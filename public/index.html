@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newslearn — Read English, Learn English</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #f7f4ef;
+  --surface: #ffffff;
+  --border:  #e8e2d9;
+  --text:    #1c1917;
+  --muted:   #78716c;
+  --accent:  #16653a;
+  --accent2: #e8f0eb;
+  --a2:      #dcfce7; --a2t: #166534;
+  --b1:      #fef9c3; --b1t: #854d0e;
+  --b2:      #fee2e2; --b2t: #991b1b;
+  --radius:  14px;
+  --shadow:  0 2px 16px rgba(0,0,0,.07);
+}
+
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 20;
+}
+.logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--accent); }
+.logo span { color: var(--text); }
+.last-updated { font-size: 0.75rem; color: var(--muted); }
+
+.filter-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; gap: 2rem; align-items: center;
+  height: 52px; overflow-x: auto; scrollbar-width: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-group { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.filter-label { font-size: .7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+
+.pill {
+  padding: 4px 12px; border-radius: 100px;
+  border: 1px solid var(--border); background: transparent;
+  font-family: 'Inter', sans-serif; font-size: .78rem; color: var(--muted);
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.pill:hover { border-color: var(--accent); color: var(--accent); }
+.pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+
+.search-wrap { margin-left: auto; position: relative; flex-shrink: 0; }
+.search-wrap input {
+  padding: 5px 12px 5px 30px; border: 1px solid var(--border);
+  border-radius: 100px; background: var(--bg);
+  font-family: 'Inter', sans-serif; font-size: .8rem; color: var(--text);
+  width: 200px; outline: none; transition: border-color .15s;
+}
+.search-wrap input:focus { border-color: var(--accent); }
+.search-wrap svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); }
+
+.main { max-width: 1160px; margin: 0 auto; padding: 2rem; }
+.stats { font-size: .8rem; color: var(--muted); margin-bottom: 1.25rem; }
+.stats b { color: var(--text); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1rem; }
+
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.25rem;
+  display: flex; flex-direction: column; gap: .75rem;
+  text-decoration: none; color: inherit;
+  transition: transform .15s, box-shadow .15s;
+}
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+
+.card-meta { display: flex; align-items: center; justify-content: space-between; }
+.source { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.lvl { font-size: .68rem; font-weight: 600; padding: 2px 8px; border-radius: 100px; }
+.lvl-a2 { background: var(--a2); color: var(--a2t); }
+.lvl-b1 { background: var(--b1); color: var(--b1t); }
+.lvl-b2 { background: var(--b2); color: var(--b2t); }
+
+.card-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; line-height: 1.4; }
+.card-desc {
+  font-size: .82rem; color: var(--muted); line-height: 1.6; flex: 1;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: .75rem; border-top: 1px solid var(--border);
+}
+.card-date { font-size: .72rem; color: var(--muted); }
+.card-topic {
+  font-size: .68rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+  background: var(--accent2); color: var(--accent); text-transform: capitalize;
+}
+
+.state-box { grid-column: 1/-1; padding: 3rem 2rem; text-align: center; color: var(--muted); }
+.state-box h3 { font-family: 'Playfair Display', serif; color: var(--text); margin-bottom: .5rem; font-size: 1.2rem; }
+.state-box p { font-size: .85rem; line-height: 1.7; max-width: 400px; margin: 0 auto; }
+
+.spinner {
+  width: 36px; height: 36px; border: 3px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin .8s linear infinite; margin: 0 auto 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.retry-btn {
+  margin-top: 1rem; padding: 8px 20px;
+  background: var(--accent); color: #fff; border: none; border-radius: 8px;
+  font-family: 'Inter', sans-serif; font-size: .85rem; font-weight: 500;
+  cursor: pointer; transition: opacity .15s;
+}
+.retry-btn:hover { opacity: .85; }
+
+@media (max-width: 640px) {
+  header, .filter-bar { padding: 0 1rem; }
+  .filter-bar { gap: 1rem; }
+  .main { padding: 1rem; }
+  .search-wrap { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">News<span>learn</span></div>
+  <span class="last-updated" id="last-updated"></span>
+</header>
+
+<div class="filter-bar">
+  <div class="filter-group">
+    <span class="filter-label">Level</span>
+    <button class="pill active" data-f="level" data-v="all">All</button>
+    <button class="pill" data-f="level" data-v="a2">A2</button>
+    <button class="pill" data-f="level" data-v="b1">B1</button>
+    <button class="pill" data-f="level" data-v="b2">B2+</button>
+  </div>
+  <div class="divider"></div>
+  <div class="filter-group">
+    <span class="filter-label">Topic</span>
+    <button class="pill active" data-f="topic" data-v="all">All</button>
+    <button class="pill" data-f="topic" data-v="technology">Tech</button>
+    <button class="pill" data-f="topic" data-v="science">Science</button>
+    <button class="pill" data-f="topic" data-v="world">World</button>
+    <button class="pill" data-f="topic" data-v="business">Business</button>
+    <button class="pill" data-f="topic" data-v="health">Health</button>
+  </div>
+  <div class="divider"></div>
+  <div class="filter-group">
+    <span class="filter-label">Source</span>
+    <button class="pill active" data-f="source" data-v="all">All</button>
+    <button class="pill" data-f="source" data-v="BBC">BBC</button>
+    <button class="pill" data-f="source" data-v="Guardian">Guardian</button>
+    <button class="pill" data-f="source" data-v="The Verge">The Verge</button>
+    <button class="pill" data-f="source" data-v="NY Times">NY Times</button>
+    <button class="pill" data-f="source" data-v="Ars Technica">Ars Technica</button>
+  </div>
+  <div class="search-wrap">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#78716c" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search…">
+  </div>
+</div>
+
+<div class="main">
+  <div class="stats" id="stats"></div>
+  <div class="grid" id="grid">
+    <div class="state-box">
+      <div class="spinner"></div>
+      <h3>Loading articles…</h3>
+      <p>Fetching fresh news from BBC, Guardian, The Verge and more.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+let articles = [];
+let filters = { level:'all', topic:'all', source:'all' };
+let query = '';
+
+function fmtDate(str) {
+  if (!str) return '';
+  const d = new Date(str);
+  return isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+}
+
+function filtered() {
+  return articles.filter(a => {
+    if (filters.level  !== 'all' && a.level  !== filters.level)  return false;
+    if (filters.topic  !== 'all' && a.topic  !== filters.topic)  return false;
+    if (filters.source !== 'all' && a.source !== filters.source) return false;
+    if (query) {
+      const q = query.toLowerCase();
+      if (!a.title.toLowerCase().includes(q) && !a.desc.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function render() {
+  const grid = document.getElementById('grid');
+  const list = filtered();
+
+  document.getElementById('stats').innerHTML = list.length === articles.length
+    ? `<b>${articles.length}</b> articles loaded`
+    : `<b>${list.length}</b> of <b>${articles.length}</b> articles`;
+
+  if (!list.length) {
+    grid.innerHTML = `<div class="state-box"><h3>No results</h3><p>Try different filters or clear the search.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(a => `
+    <a class="card" href="${a.url}" target="_blank" rel="noopener noreferrer">
+      <div class="card-meta">
+        <span class="source">${a.source}</span>
+        <span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span>
+      </div>
+      <div class="card-title">${a.title}</div>
+      <div class="card-desc">${a.desc || '<em style="opacity:.4">No preview</em>'}</div>
+      <div class="card-footer">
+        <span class="card-date">${fmtDate(a.date)}</span>
+        <span class="card-topic">${a.topic}</span>
+      </div>
+    </a>
+  `).join('');
+}
+
+async function loadAll() {
+  document.getElementById('stats').textContent = '';
+  document.getElementById('grid').innerHTML = `
+    <div class="state-box">
+      <div class="spinner"></div>
+      <h3>Loading articles…</h3>
+      <p>Fetching from BBC, Guardian, The Verge, NY Times and Ars Technica.</p>
+    </div>`;
+
+  try {
+    const res  = await fetch('/api/news');
+    const data = await res.json();
+    if (!data.ok) throw new Error('API error');
+    articles = data.articles;
+    document.getElementById('last-updated').textContent =
+      'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+    render();
+  } catch (e) {
+    document.getElementById('grid').innerHTML = `
+      <div class="state-box">
+        <h3>Could not load articles</h3>
+        <p>Something went wrong. Check that the project is deployed on Vercel (not opened as a local file).</p>
+        <button class="retry-btn" onclick="loadAll()">Try again</button>
+      </div>`;
+  }
+}
+
+document.querySelectorAll('.pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const f = btn.dataset.f;
+    document.querySelectorAll(`.pill[data-f="${f}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filters[f] = btn.dataset.v;
+    render();
+  });
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  query = e.target.value;
+  render();
+});
+
+loadAll();
+setInterval(loadAll, 15 * 60 * 1000);
+</script>
+</body>
+</html>
