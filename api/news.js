@@ -29,53 +29,60 @@ function fetchUrl(url) {
   });
 }
 
+function stripHtml(s) {
+  return (s || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#\d+;/g, ' ').replace(/&[a-z]+;/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+}
+
+function cleanDesc(s) {
+  return (s || '')
+    .replace(/Get our .{0,150}/gi, '')
+    .replace(/Sign up .{0,150}/gi, '')
+    .replace(/Subscribe .{0,150}/gi, '')
+    .replace(/Click here .{0,100}/gi, '')
+    .replace(/Read more .{0,100}/gi, '')
+    .replace(/\s+/g, ' ').trim()
+    .slice(0, 280);
+}
+
 function parseXml(xml, source) {
   const items = [];
-  const itemMatches = xml.match(/<item[\s\S]*?<\/item>/g) ||
-                      xml.match(/<entry[\s\S]*?<\/entry>/g) || [];
+  const blocks = xml.match(/<item[\s\S]*?<\/item>/g)
+               || xml.match(/<entry[\s\S]*?<\/entry>/g) || [];
 
-  for (const item of itemMatches.slice(0, 20)) {
-    const get = (tag, fallback = '') => {
-      const m = item.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`, 'i'))
-             || item.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
-      return m ? m[1].trim() : fallback;
+  for (const block of blocks.slice(0, 25)) {
+    const get = (tag) => {
+      const m = block.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`, 'i'))
+             || block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
+      return m ? m[1].trim() : '';
     };
     const getAttr = (tag, attr) => {
-      const m = item.match(new RegExp(`<${tag}[^>]*${attr}="([^"]*)"`, 'i'));
+      const m = block.match(new RegExp(`<${tag}[^>]*\\s${attr}="([^"]*)"`, 'i'));
       return m ? m[1] : '';
     };
 
     const title = stripHtml(get('title'));
     const link  = get('link') || getAttr('link', 'href');
-    let desc    = stripHtml(get('description') || get('summary') || get('content'));
+    const raw   = get('description') || get('summary') || get('content') || '';
+    const desc  = cleanDesc(stripHtml(raw));
+    const date  = get('pubDate') || get('published') || get('updated') || '';
 
-    // Remove newsletter/promo junk that Guardian/BBC put in descriptions
-    desc = desc
-      .replace(/Get our .{0,120}(email|podcast|newsletter|app)[^.]*\./gi, '')
-      .replace(/Sign up .{0,120}\./gi, '')
-      .replace(/Subscribe .{0,120}\./gi, '')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 300);
+    // Hard filters: must have real title and valid URL
+    if (!title || title.length < 15) continue;
+    if (!link || !link.startsWith('http')) continue;
+    // Skip nav/promo items
+    if (/^(get our|sign up|subscribe|live$|live updates|breaking news)/i.test(title)) continue;
+    // Skip if title looks like a sentence fragment (no capital first letter after trim)
+    if (!/^[A-Z"'«]/.test(title)) continue;
 
-    const date = get('pubDate') || get('published') || get('updated') || '';
-
-    // Skip junk: no title, too short title, no valid http link, or title looks like nav/promo
-    const isJunk = !title || title.length < 10 || !link.startsWith('http') ||
-      /^(get our|sign up|subscribe|newsletter|breaking news|live updates?$)/i.test(title);
-
-    if (!isJunk) items.push({ title, desc, url: link, date, source });
+    items.push({ title, desc, url: link, date, source });
   }
   return items;
 }
 
-function stripHtml(s) {
-  return (s || '').replace(/<[^>]+>/g, ' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<')
-    .replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#\d+;/g,' ')
-    .replace(/\s+/g,' ').trim();
-}
-
-// ── Language level detection ──────────────────────────────────────────────────
 const HARD = new Set(['pursuant','thereof','notwithstanding','aforementioned','escalate',
   'infrastructure','incumbent','sovereignty','diplomatic','coalition','referendum',
   'sanctions','austerity','monetary','fiscal','semiconductor','algorithm','cybersecurity',
@@ -85,7 +92,7 @@ const HARD = new Set(['pursuant','thereof','notwithstanding','aforementioned','e
   'geopolitical','bilateral','multilateral','embargo','tariff','inflation','recession',
   'diversification','speculation','volatility','proliferation','cryptocurrency','litigation',
   'arbitration','constitutional','bureaucratic','parliamentary','legislative','negotiations',
-  'administration','deployment','implementation','authorization','infrastructure']);
+  'administration','deployment','implementation','authorization']);
 
 const MEDIUM = new Set(['government','minister','parliament','policy','regulation','legislation',
   'economy','industry','company','profit','revenue','investment','market','climate',
@@ -93,7 +100,7 @@ const MEDIUM = new Set(['government','minister','parliament','policy','regulatio
   'military','conflict','border','territory','alliance','treaty','summit','research',
   'discovery','experiment','species','evolution','genetic','election','candidate','ballot',
   'democracy','vaccine','treatment','diagnosis','symptom','infection','technology',
-  'software','platform','network','digital','innovation','agreement','proposal','deadline',
+  'software','platform','network','digital','innovation','agreement','proposal',
   'approval','dispute','negotiate','representative','executive','commission','authority',
   'strategic','establish','controversial','significant','responsibility','international']);
 
@@ -112,12 +119,11 @@ function guessTopic(t, d) {
   const s = ((t || '') + ' ' + (d || '')).toLowerCase();
   if (/\b(ai|tech|software|apple|google|microsoft|robot|cyber|chip|iphone|android|startup|openai|nvidia|meta)\b/.test(s)) return 'technology';
   if (/\b(space|nasa|climate|planet|science|study|research|biology|physics|chemistry|asteroid|quantum|genome)\b/.test(s)) return 'science';
-  if (/\b(health|cancer|virus|hospital|doctor|mental|fitness|obesity|drug|vaccine|disease|treatment|covid)\b/.test(s)) return 'health';
+  if (/\b(health|cancer|virus|hospital|doctor|mental|fitness|obesity|drug|vaccine|disease|treatment|covid|ebola)\b/.test(s)) return 'health';
   if (/\b(market|economy|stock|inflation|bank|trade|invest|gdp|recession|company|revenue|profit|crypto|bitcoin)\b/.test(s)) return 'business';
   return 'world';
 }
 
-// ── Handler ───────────────────────────────────────────────────────────────────
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate');
@@ -136,15 +142,14 @@ module.exports = async (req, res) => {
       topic: guessTopic(a.title, a.desc),
     }));
 
-  // deduplicate
+  // Deduplicate by title
   const seen = new Set();
   articles = articles.filter(a => {
-    const key = a.title.slice(0, 50).toLowerCase();
+    const key = a.title.slice(0, 60).toLowerCase();
     if (seen.has(key)) return false;
     seen.add(key); return true;
   });
 
-  // sort by date
   articles.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   res.status(200).json({ ok: true, count: articles.length, articles });

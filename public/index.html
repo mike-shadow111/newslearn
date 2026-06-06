@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Newslearn — Read English, Learn English</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -19,117 +19,158 @@
   --a2:      #dcfce7; --a2t: #166534;
   --b1:      #fef9c3; --b1t: #854d0e;
   --b2:      #fee2e2; --b2t: #991b1b;
-  --radius:  14px;
-  --shadow:  0 2px 16px rgba(0,0,0,.07);
 }
 
 body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
+/* HEADER */
 header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  padding: 0 2rem;
-  height: 60px;
+  padding: 0 1.5rem;
+  height: 56px;
   display: flex; align-items: center; justify-content: space-between;
-  position: sticky; top: 0; z-index: 20;
+  position: sticky; top: 0; z-index: 30;
 }
-.logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--accent); }
+.logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--accent); }
 .logo span { color: var(--text); }
-.last-updated { font-size: 0.75rem; color: var(--muted); }
+.updated { font-size: .72rem; color: var(--muted); }
 
+/* FILTER BAR */
 .filter-bar {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  padding: 0 2rem;
-  display: flex; gap: 2rem; align-items: center;
-  height: 52px; overflow-x: auto; scrollbar-width: none;
+  position: sticky; top: 56px; z-index: 20;
+  overflow-x: auto; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 .filter-bar::-webkit-scrollbar { display: none; }
-.filter-group { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.filter-label { font-size: .7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.filter-inner {
+  display: flex; align-items: center; gap: 0;
+  padding: 0 1.5rem;
+  min-width: max-content;
+  height: 48px;
+}
+.filter-group { display: flex; align-items: center; gap: 5px; padding-right: 1.25rem; }
+.filter-group + .filter-group { padding-left: 1.25rem; border-left: 1px solid var(--border); }
+.flabel { font-size: .65rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-right: 3px; }
 
 .pill {
-  padding: 4px 12px; border-radius: 100px;
+  padding: 3px 11px; border-radius: 100px;
   border: 1px solid var(--border); background: transparent;
-  font-family: 'Inter', sans-serif; font-size: .78rem; color: var(--muted);
-  cursor: pointer; transition: all .15s; white-space: nowrap;
+  font-family: 'Inter', sans-serif; font-size: .75rem; color: var(--muted);
+  cursor: pointer; transition: all .15s; white-space: nowrap; line-height: 1.6;
 }
 .pill:hover { border-color: var(--accent); color: var(--accent); }
 .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-.divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
-
-.search-wrap { margin-left: auto; position: relative; flex-shrink: 0; }
-.search-wrap input {
-  padding: 5px 12px 5px 30px; border: 1px solid var(--border);
-  border-radius: 100px; background: var(--bg);
-  font-family: 'Inter', sans-serif; font-size: .8rem; color: var(--text);
-  width: 200px; outline: none; transition: border-color .15s;
+/* SEARCH — отдельная строка на мобильном */
+.search-row {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 1rem;
+  display: none;
 }
-.search-wrap input:focus { border-color: var(--accent); }
-.search-wrap svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); }
+.search-row input {
+  width: 100%; padding: 7px 12px 7px 32px;
+  border: 1px solid var(--border); border-radius: 100px;
+  background: var(--bg); font-family: 'Inter', sans-serif;
+  font-size: .85rem; color: var(--text); outline: none;
+}
+.search-row input:focus { border-color: var(--accent); }
+.search-wrap { position: relative; }
+.search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); }
 
-.main { max-width: 1160px; margin: 0 auto; padding: 2rem; }
-.stats { font-size: .8rem; color: var(--muted); margin-bottom: 1.25rem; }
+/* десктоп-поиск в filter-bar */
+.search-desktop { margin-left: auto; padding-left: 1.25rem; border-left: 1px solid var(--border); }
+.search-desktop input {
+  padding: 4px 10px 4px 28px;
+  border: 1px solid var(--border); border-radius: 100px;
+  background: var(--bg); font-family: 'Inter', sans-serif;
+  font-size: .78rem; color: var(--text); width: 180px; outline: none;
+  transition: border-color .15s;
+}
+.search-desktop input:focus { border-color: var(--accent); }
+.search-desktop .search-wrap svg { left: 8px; }
+
+/* MAIN */
+.main { max-width: 1180px; margin: 0 auto; padding: 1.5rem; }
+.stats { font-size: .78rem; color: var(--muted); margin-bottom: 1.25rem; }
 .stats b { color: var(--text); }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1rem; align-items: start; }
+/* MASONRY via columns — no holes ever */
+.masonry {
+  columns: 3 300px;
+  column-gap: 1rem;
+}
 
+/* CARD */
 .card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1.25rem;
-  display: flex; flex-direction: column; gap: .75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.1rem 1.15rem;
+  display: flex; flex-direction: column; gap: .6rem;
   text-decoration: none; color: inherit;
   transition: transform .15s, box-shadow .15s;
+  break-inside: avoid;
+  margin-bottom: 1rem;
+  cursor: pointer;
 }
-.card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.08); }
 
 .card-meta { display: flex; align-items: center; justify-content: space-between; }
-.source { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
-.lvl { font-size: .68rem; font-weight: 600; padding: 2px 8px; border-radius: 100px; }
+.csource { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.lvl { font-size: .65rem; font-weight: 600; padding: 2px 7px; border-radius: 100px; }
 .lvl-a2 { background: var(--a2); color: var(--a2t); }
 .lvl-b1 { background: var(--b1); color: var(--b1t); }
 .lvl-b2 { background: var(--b2); color: var(--b2t); }
 
-.card-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; line-height: 1.4; }
-.card-desc {
-  font-size: .82rem; color: var(--muted); line-height: 1.6; flex: 1;
+.ctitle {
+  font-family: 'Playfair Display', serif;
+  font-size: .98rem; line-height: 1.4; color: var(--text);
+}
+.cdesc {
+  font-size: .8rem; color: var(--muted); line-height: 1.6;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
-.card-footer {
+.cfoot {
   display: flex; align-items: center; justify-content: space-between;
-  padding-top: .75rem; border-top: 1px solid var(--border);
+  padding-top: .6rem; border-top: 1px solid var(--border); margin-top: auto;
 }
-.card-date { font-size: .72rem; color: var(--muted); }
-.card-topic {
-  font-size: .68rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+.cdate { font-size: .7rem; color: var(--muted); }
+.ctopic {
+  font-size: .65rem; font-weight: 600; padding: 2px 7px; border-radius: 4px;
   background: var(--accent2); color: var(--accent); text-transform: capitalize;
 }
 
-.state-box { grid-column: 1/-1; padding: 3rem 2rem; text-align: center; color: var(--muted); }
-.state-box h3 { font-family: 'Playfair Display', serif; color: var(--text); margin-bottom: .5rem; font-size: 1.2rem; }
-.state-box p { font-size: .85rem; line-height: 1.7; max-width: 400px; margin: 0 auto; }
-
+/* STATE */
+.state-box { padding: 4rem 1rem; text-align: center; color: var(--muted); }
+.state-box h3 { font-family: 'Playfair Display', serif; color: var(--text); margin-bottom: .5rem; font-size: 1.1rem; }
+.state-box p { font-size: .82rem; line-height: 1.7; max-width: 380px; margin: 0 auto; }
 .spinner {
-  width: 36px; height: 36px; border: 3px solid var(--border);
+  width: 32px; height: 32px; border: 3px solid var(--border);
   border-top-color: var(--accent); border-radius: 50%;
   animation: spin .8s linear infinite; margin: 0 auto 1rem;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-.retry-btn {
-  margin-top: 1rem; padding: 8px 20px;
+.retry {
+  margin-top: 1rem; padding: 7px 18px;
   background: var(--accent); color: #fff; border: none; border-radius: 8px;
-  font-family: 'Inter', sans-serif; font-size: .85rem; font-weight: 500;
-  cursor: pointer; transition: opacity .15s;
+  font-family: 'Inter', sans-serif; font-size: .82rem; font-weight: 500; cursor: pointer;
 }
-.retry-btn:hover { opacity: .85; }
 
+/* MOBILE */
 @media (max-width: 640px) {
-  header, .filter-bar { padding: 0 1rem; }
-  .filter-bar { gap: 1rem; }
+  header { padding: 0 1rem; }
+  .search-desktop { display: none; }
+  .search-row { display: block; position: sticky; top: 104px; z-index: 19; }
   .main { padding: 1rem; }
-  .search-wrap { display: none; }
+  .masonry { columns: 1; }
+  .filter-inner { height: 44px; padding: 0 1rem; }
+}
+@media (min-width: 641px) and (max-width: 900px) {
+  .masonry { columns: 2 280px; }
 }
 </style>
 </head>
@@ -137,50 +178,60 @@ header {
 
 <header>
   <div class="logo">News<span>learn</span></div>
-  <span class="last-updated" id="last-updated"></span>
+  <span class="updated" id="updated"></span>
 </header>
 
 <div class="filter-bar">
-  <div class="filter-group">
-    <span class="filter-label">Level</span>
-    <button class="pill active" data-f="level" data-v="all">All</button>
-    <button class="pill" data-f="level" data-v="a2">A2</button>
-    <button class="pill" data-f="level" data-v="b1">B1</button>
-    <button class="pill" data-f="level" data-v="b2">B2+</button>
+  <div class="filter-inner">
+    <div class="filter-group">
+      <span class="flabel">Level</span>
+      <button class="pill active" data-f="level" data-v="all">All</button>
+      <button class="pill" data-f="level" data-v="a2">A2</button>
+      <button class="pill" data-f="level" data-v="b1">B1</button>
+      <button class="pill" data-f="level" data-v="b2">B2+</button>
+    </div>
+    <div class="filter-group">
+      <span class="flabel">Topic</span>
+      <button class="pill active" data-f="topic" data-v="all">All</button>
+      <button class="pill" data-f="topic" data-v="technology">Tech</button>
+      <button class="pill" data-f="topic" data-v="science">Science</button>
+      <button class="pill" data-f="topic" data-v="world">World</button>
+      <button class="pill" data-f="topic" data-v="business">Business</button>
+      <button class="pill" data-f="topic" data-v="health">Health</button>
+    </div>
+    <div class="filter-group">
+      <span class="flabel">Source</span>
+      <button class="pill active" data-f="source" data-v="all">All</button>
+      <button class="pill" data-f="source" data-v="BBC">BBC</button>
+      <button class="pill" data-f="source" data-v="Guardian">Guardian</button>
+      <button class="pill" data-f="source" data-v="The Verge">The Verge</button>
+      <button class="pill" data-f="source" data-v="NY Times">NY Times</button>
+      <button class="pill" data-f="source" data-v="Ars Technica">Ars Technica</button>
+    </div>
+    <div class="filter-group search-desktop">
+      <div class="search-wrap">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#78716c" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="search-d" placeholder="Search…">
+      </div>
+    </div>
   </div>
-  <div class="divider"></div>
-  <div class="filter-group">
-    <span class="filter-label">Topic</span>
-    <button class="pill active" data-f="topic" data-v="all">All</button>
-    <button class="pill" data-f="topic" data-v="technology">Tech</button>
-    <button class="pill" data-f="topic" data-v="science">Science</button>
-    <button class="pill" data-f="topic" data-v="world">World</button>
-    <button class="pill" data-f="topic" data-v="business">Business</button>
-    <button class="pill" data-f="topic" data-v="health">Health</button>
-  </div>
-  <div class="divider"></div>
-  <div class="filter-group">
-    <span class="filter-label">Source</span>
-    <button class="pill active" data-f="source" data-v="all">All</button>
-    <button class="pill" data-f="source" data-v="BBC">BBC</button>
-    <button class="pill" data-f="source" data-v="Guardian">Guardian</button>
-    <button class="pill" data-f="source" data-v="The Verge">The Verge</button>
-    <button class="pill" data-f="source" data-v="NY Times">NY Times</button>
-    <button class="pill" data-f="source" data-v="Ars Technica">Ars Technica</button>
-  </div>
+</div>
+
+<!-- mobile search -->
+<div class="search-row">
   <div class="search-wrap">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#78716c" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input type="text" id="search" placeholder="Search…">
+    <input type="text" id="search-m" placeholder="Search articles…">
   </div>
 </div>
 
 <div class="main">
   <div class="stats" id="stats"></div>
-  <div class="grid" id="grid">
+  <div id="container">
     <div class="state-box">
       <div class="spinner"></div>
       <h3>Loading articles…</h3>
-      <p>Fetching fresh news from BBC, Guardian, The Verge and more.</p>
+      <p>Fetching from BBC, Guardian, The Verge, NY Times and Ars Technica.</p>
     </div>
   </div>
 </div>
@@ -190,94 +241,101 @@ let articles = [];
 let filters = { level:'all', topic:'all', source:'all' };
 let query = '';
 
-function fmtDate(str) {
-  if (!str) return '';
-  const d = new Date(str);
+function fmtDate(s) {
+  if (!s) return '';
+  const d = new Date(s);
   return isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
 }
 
-function filtered() {
+function getFiltered() {
   return articles.filter(a => {
     if (filters.level  !== 'all' && a.level  !== filters.level)  return false;
     if (filters.topic  !== 'all' && a.topic  !== filters.topic)  return false;
     if (filters.source !== 'all' && a.source !== filters.source) return false;
     if (query) {
       const q = query.toLowerCase();
-      if (!a.title.toLowerCase().includes(q) && !a.desc.toLowerCase().includes(q)) return false;
+      if (!a.title.toLowerCase().includes(q) && !(a.desc||'').toLowerCase().includes(q)) return false;
     }
     return true;
   });
 }
 
 function render() {
-  const grid = document.getElementById('grid');
-  const list = filtered();
+  const list = getFiltered();
+  const container = document.getElementById('container');
 
   document.getElementById('stats').innerHTML = list.length === articles.length
-    ? `<b>${articles.length}</b> articles loaded`
+    ? `<b>${articles.length}</b> articles`
     : `<b>${list.length}</b> of <b>${articles.length}</b> articles`;
 
   if (!list.length) {
-    grid.innerHTML = `<div class="state-box"><h3>No results</h3><p>Try different filters or clear the search.</p></div>`;
+    container.innerHTML = `<div class="state-box"><h3>No results</h3><p>Try different filters or clear the search.</p></div>`;
     return;
   }
 
-  grid.innerHTML = list.map(a => `
+  const html = list.map(a => `
     <a class="card" href="${a.url}" target="_blank" rel="noopener noreferrer">
       <div class="card-meta">
-        <span class="source">${a.source}</span>
+        <span class="csource">${a.source}</span>
         <span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span>
       </div>
-      <div class="card-title">${a.title}</div>
-      <div class="card-desc">${a.desc || '<em style="opacity:.4">No preview</em>'}</div>
-      <div class="card-footer">
-        <span class="card-date">${fmtDate(a.date)}</span>
-        <span class="card-topic">${a.topic}</span>
+      <div class="ctitle">${a.title}</div>
+      ${a.desc ? `<div class="cdesc">${a.desc}</div>` : ''}
+      <div class="cfoot">
+        <span class="cdate">${fmtDate(a.date)}</span>
+        <span class="ctopic">${a.topic}</span>
       </div>
     </a>
   `).join('');
+
+  container.innerHTML = `<div class="masonry">${html}</div>`;
 }
 
 async function loadAll() {
   document.getElementById('stats').textContent = '';
-  document.getElementById('grid').innerHTML = `
+  document.getElementById('container').innerHTML = `
     <div class="state-box">
       <div class="spinner"></div>
       <h3>Loading articles…</h3>
       <p>Fetching from BBC, Guardian, The Verge, NY Times and Ars Technica.</p>
     </div>`;
-
   try {
     const res  = await fetch('/api/news');
     const data = await res.json();
-    if (!data.ok) throw new Error('API error');
+    if (!data.ok) throw new Error('api');
     articles = data.articles;
-    document.getElementById('last-updated').textContent =
+    document.getElementById('updated').textContent =
       'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
     render();
-  } catch (e) {
-    document.getElementById('grid').innerHTML = `
+  } catch {
+    document.getElementById('container').innerHTML = `
       <div class="state-box">
         <h3>Could not load articles</h3>
-        <p>Something went wrong. Check that the project is deployed on Vercel (not opened as a local file).</p>
-        <button class="retry-btn" onclick="loadAll()">Try again</button>
+        <p>Something went wrong. Make sure the project is deployed on Vercel.</p>
+        <button class="retry" onclick="loadAll()">Try again</button>
       </div>`;
   }
 }
 
+// Filters
 document.querySelectorAll('.pill').forEach(btn => {
   btn.addEventListener('click', () => {
-    const f = btn.dataset.f;
-    document.querySelectorAll(`.pill[data-f="${f}"]`).forEach(b => b.classList.remove('active'));
+    document.querySelectorAll(`.pill[data-f="${btn.dataset.f}"]`).forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    filters[f] = btn.dataset.v;
+    filters[btn.dataset.f] = btn.dataset.v;
     render();
   });
 });
 
-document.getElementById('search').addEventListener('input', e => {
-  query = e.target.value;
-  render();
+// Search — sync desktop and mobile inputs
+function onSearch(val) { query = val; render(); }
+document.getElementById('search-d').addEventListener('input', e => {
+  document.getElementById('search-m').value = e.target.value;
+  onSearch(e.target.value);
+});
+document.getElementById('search-m').addEventListener('input', e => {
+  document.getElementById('search-d').value = e.target.value;
+  onSearch(e.target.value);
 });
 
 loadAll();
