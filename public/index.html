@@ -5,19 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Newslearn</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg:#f7f4ef; --surface:#fff; --border:#e8e2d9;
-  --text:#1c1917; --muted:#78716c;
+  --text:#1c1917; --muted:#78716c; --subtle:#a8a29e;
   --accent:#16653a; --accent2:#e8f0eb;
   --a2:#dcfce7; --a2t:#166534;
   --b1:#fef9c3; --b1t:#854d0e;
   --b2:#fee2e2; --b2t:#991b1b;
   --hh:56px; --fh:48px;
+  --font-sans:'Inter',system-ui,sans-serif;
+  --font-serif:'Playfair Display',Georgia,serif;
 }
-body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); -webkit-text-size-adjust:100%; overflow-x:hidden; }
+html { font-size:16px; }
+body { font-family:var(--font-sans); background:var(--bg); color:var(--text); -webkit-text-size-adjust:100%; overflow-x:hidden; }
 
 /* ── HEADER ── */
 header {
@@ -26,9 +29,9 @@ header {
   display:flex; align-items:center; justify-content:space-between;
   position:sticky; top:0; z-index:40;
 }
-.logo { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--accent); cursor:pointer; user-select:none; }
+.logo { font-family:var(--font-serif); font-size:1.4rem; color:var(--accent); cursor:pointer; user-select:none; }
 .logo span { color:var(--text); }
-#updated { font-size:.72rem; color:var(--muted); }
+#updated { font-size:.72rem; color:var(--muted); font-family:var(--font-sans); }
 
 /* ── FILTER BAR ── */
 .fbar {
@@ -37,181 +40,193 @@ header {
   overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch;
 }
 .fbar::-webkit-scrollbar { display:none; }
-.finner {
-  display:flex; align-items:center; gap:0;
-  padding:0 1.5rem; height:var(--fh); min-width:max-content;
-}
+.finner { display:flex; align-items:center; padding:0 1.5rem; height:var(--fh); min-width:max-content; gap:0; }
 .fg { display:flex; align-items:center; gap:4px; flex-shrink:0; }
-.fg + .fg { margin-left:.9rem; padding-left:.9rem; border-left:1px solid var(--border); }
-.flabel { font-size:.63rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-right:2px; }
+.fg+.fg { margin-left:.85rem; padding-left:.85rem; border-left:1px solid var(--border); }
+.flabel { font-size:.62rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-right:2px; font-family:var(--font-sans); }
 .pill {
   padding:3px 10px; border-radius:100px;
   border:1px solid var(--border); background:transparent;
-  font-family:'Inter',sans-serif; font-size:.74rem; color:var(--muted);
+  font-family:var(--font-sans); font-size:.74rem; font-weight:400; color:var(--muted);
   cursor:pointer; transition:all .12s; white-space:nowrap; line-height:1.7;
   -webkit-tap-highlight-color:transparent;
 }
 .pill:hover { border-color:var(--accent); color:var(--accent); }
-.pill.active { background:var(--accent); border-color:var(--accent); color:#fff; }
-
-/* Search — always visible in filter bar, highlighted */
-.fg-search { margin-left:1rem; padding-left:.9rem; border-left:1px solid var(--border); }
+.pill.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:500; }
+.fg-search { margin-left:auto; }
 .swrap { position:relative; }
 .sinput {
   padding:4px 10px 4px 30px; border:1.5px solid var(--accent);
   border-radius:100px; background:var(--accent2);
-  font-family:'Inter',sans-serif; font-size:.78rem; color:var(--text);
-  width:160px; outline:none; transition:width .2s, box-shadow .15s;
+  font-family:var(--font-sans); font-size:.78rem; color:var(--text);
+  width:155px; outline:none; transition:width .2s,box-shadow .15s;
 }
-.sinput:focus { width:220px; box-shadow:0 0 0 3px rgba(22,101,58,.12); }
+.sinput::placeholder { color:var(--muted); }
+.sinput:focus { width:210px; box-shadow:0 0 0 3px rgba(22,101,58,.1); }
 .sico { position:absolute; left:9px; top:50%; transform:translateY(-50%); pointer-events:none; }
 
 /* ── MAIN ── */
-.main { max-width:1180px; margin:0 auto; padding:1.25rem 1.5rem; }
-#stats { font-size:.78rem; color:var(--muted); margin-bottom:1rem; }
+.main { max-width:1180px; margin:0 auto; padding:1.25rem 1.5rem; overflow:hidden; }
+#stats { font-size:.78rem; color:var(--muted); margin-bottom:1rem; font-family:var(--font-sans); }
 #stats b { color:var(--text); }
 
-/* ── MASONRY — CSS column-count, the only reliable cross-browser solution ── */
-.masonry {
-  column-count:3; column-gap:1rem;
-}
+/* ── MASONRY ── */
+.masonry { column-count:3; column-gap:1rem; orphans:1; widows:1; }
 .card {
-  display:block; /* must be block not flex for break-inside to work */
-  break-inside:avoid; -webkit-column-break-inside:avoid;
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:12px; padding:1rem 1.1rem;
-  margin-bottom:1rem; /* gap between cards in same column */
-  cursor:pointer; transition:transform .13s, box-shadow .13s;
+  display:block; break-inside:avoid; -webkit-column-break-inside:avoid; page-break-inside:avoid;
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:1rem 1.1rem; margin-bottom:1rem;
+  cursor:pointer; transition:transform .13s,box-shadow .13s;
   -webkit-tap-highlight-color:transparent;
+  /* Force block formatting context to prevent bleed */
+  overflow:hidden;
 }
 .card:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.08); }
 .cmeta { display:flex; align-items:center; justify-content:space-between; margin-bottom:.45rem; }
-.csrc { font-size:.63rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
-.lvl { font-size:.63rem; font-weight:600; padding:2px 7px; border-radius:100px; }
+.csrc { font-size:.63rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-family:var(--font-sans); }
+.lvl { font-size:.63rem; font-weight:600; padding:2px 7px; border-radius:100px; font-family:var(--font-sans); }
 .lvl-a2{background:var(--a2);color:var(--a2t);}
 .lvl-b1{background:var(--b1);color:var(--b1t);}
 .lvl-b2{background:var(--b2);color:var(--b2t);}
-.ctitle { font-family:'Playfair Display',serif; font-size:.97rem; line-height:1.42; font-weight:600; color:var(--text); margin-bottom:.4rem; }
-.cdesc { font-size:.79rem; color:var(--muted); line-height:1.62; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:.55rem; }
+.ctitle { font-family:var(--font-serif); font-size:.97rem; line-height:1.42; font-weight:600; color:var(--text); margin-bottom:.4rem; }
+.cdesc { font-size:.79rem; color:var(--muted); line-height:1.6; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:.55rem; font-family:var(--font-sans); }
 .cfoot { display:flex; align-items:center; justify-content:space-between; padding-top:.5rem; border-top:1px solid var(--border); }
-.cdate { font-size:.68rem; color:var(--muted); }
-.ctopic { font-size:.63rem; font-weight:600; padding:2px 7px; border-radius:4px; background:var(--accent2); color:var(--accent); text-transform:capitalize; }
+.cdate { font-size:.68rem; color:var(--subtle); font-family:var(--font-sans); }
+.ctopic { font-size:.63rem; font-weight:600; padding:2px 7px; border-radius:4px; background:var(--accent2); color:var(--accent); text-transform:capitalize; font-family:var(--font-sans); }
 
 /* ── STATE ── */
 .state { padding:4rem 1rem; text-align:center; color:var(--muted); }
-.state h3 { font-family:'Playfair Display',serif; color:var(--text); margin-bottom:.4rem; font-size:1.1rem; }
-.state p { font-size:.82rem; line-height:1.7; max-width:360px; margin:0 auto; }
+.state h3 { font-family:var(--font-serif); color:var(--text); margin-bottom:.4rem; font-size:1.1rem; }
+.state p { font-size:.82rem; line-height:1.7; max-width:360px; margin:0 auto; font-family:var(--font-sans); }
 .spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .75s linear infinite; margin:0 auto 1rem; }
 @keyframes spin{to{transform:rotate(360deg);}}
-.retry { margin-top:1rem; padding:7px 18px; background:var(--accent); color:#fff; border:none; border-radius:8px; font-family:'Inter',sans-serif; font-size:.82rem; font-weight:500; cursor:pointer; }
+.retry { margin-top:1rem; padding:7px 18px; background:var(--accent); color:#fff; border:none; border-radius:8px; font-family:var(--font-sans); font-size:.82rem; font-weight:500; cursor:pointer; }
 
-/* ── READER OVERLAY ── */
+/* ══════════════════════════════════════
+   READER — full page overlay
+   ══════════════════════════════════════ */
 .overlay {
   display:none; position:fixed; inset:0; z-index:50;
-  background:rgba(28,25,23,.55); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
-  overflow-y:auto; -webkit-overflow-scrolling:touch; padding:1.5rem 1rem;
+  background:var(--bg); overflow-y:auto; -webkit-overflow-scrolling:touch;
 }
-.overlay.open { display:flex; justify-content:center; align-items:flex-start; animation:fin .18s ease; }
-@keyframes fin{from{opacity:0}to{opacity:1}}
+.overlay.open { display:block; animation:pagein .2s ease; }
+@keyframes pagein { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
 
-.rbox {
-  background:var(--surface); border-radius:16px;
-  width:100%; max-width:720px;
-  padding:2rem 2.5rem 3rem; position:relative;
-  animation:sin .18s ease;
-  font-family:'Inter',sans-serif; /* explicit font override */
+/* Reader header */
+.r-header {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:0 2rem; height:56px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:10;
 }
-@keyframes sin{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.r-back {
+  display:flex; align-items:center; gap:.4rem;
+  background:none; border:none; font-family:var(--font-sans);
+  font-size:.82rem; color:var(--muted); cursor:pointer; padding:6px 0;
+  transition:color .12s; -webkit-tap-highlight-color:transparent;
+}
+.r-back:hover { color:var(--accent); }
+.r-meta-badge { display:flex; align-items:center; gap:.5rem; }
 
-.rclose {
-  position:absolute; top:1rem; right:1rem;
-  background:var(--bg); border:1px solid var(--border); border-radius:100px;
-  padding:4px 14px; font-size:.75rem; font-family:'Inter',sans-serif; color:var(--muted);
-  cursor:pointer; transition:all .12s;
-}
-.rclose:hover { border-color:var(--accent); color:var(--accent); }
+/* Reader body */
+.r-body { max-width:680px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
 
-.rmeta { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem; }
-.rtitle {
-  font-family:'Playfair Display',serif; font-size:1.65rem; line-height:1.3;
-  font-weight:600; color:var(--text); margin-bottom:1.25rem;
+.r-eyebrow {
+  display:flex; align-items:center; gap:.6rem; margin-bottom:1rem; flex-wrap:wrap;
+}
+.r-source { font-size:.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-family:var(--font-sans); }
+.r-date   { font-size:.72rem; color:var(--subtle); font-family:var(--font-sans); }
+.r-dot    { width:3px; height:3px; border-radius:50%; background:var(--subtle); }
+
+.r-title {
+  font-family:var(--font-serif); font-size:2rem; line-height:1.25;
+  font-weight:600; color:var(--text); margin-bottom:1.5rem;
 }
 
-/* Article body styles */
-.abody { font-family:'Inter',sans-serif; }
-.abody p {
-  font-size:1rem; line-height:1.85; color:var(--text);
-  margin-bottom:1.1rem;
+.r-hint {
+  display:inline-flex; align-items:center; gap:.4rem;
+  font-size:.75rem; color:var(--muted); font-family:var(--font-sans);
+  padding:.4rem .75rem; background:var(--accent2);
+  border-radius:8px; margin-bottom:1.75rem;
 }
-.abody h2 {
-  font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:600;
-  color:var(--text); margin:1.5rem 0 .6rem; line-height:1.3;
-}
-.abody h3 {
-  font-family:'Playfair Display',serif; font-size:1rem; font-style:italic;
-  color:var(--text); margin:1.25rem 0 .5rem;
-}
-.abody blockquote {
-  border-left:3px solid var(--accent); padding:.5rem 1rem;
-  margin:1rem 0; color:var(--muted); font-style:italic;
-}
-.abody .w {
-  cursor:pointer; border-radius:3px; transition:background .1s;
-  display:inline; padding:0 1px;
-}
-.abody .w:hover { background:var(--b1); }
 
-.rhint {
-  font-size:.75rem; color:var(--muted); margin-bottom:1.25rem;
-  padding:.45rem .75rem; background:var(--accent2); border-radius:8px; display:inline-block;
-  font-family:'Inter',sans-serif;
+/* Article text */
+.r-article { font-family:var(--font-sans); }
+.r-article p {
+  font-size:1.05rem; line-height:1.85; color:var(--text);
+  margin-bottom:1.2rem; font-family:var(--font-sans);
 }
+.r-article h2 {
+  font-family:var(--font-serif); font-size:1.3rem; font-weight:600;
+  color:var(--text); margin:2rem 0 .7rem; line-height:1.3;
+}
+.r-article h3 {
+  font-family:var(--font-serif); font-size:1.1rem; font-weight:400; font-style:italic;
+  color:var(--text); margin:1.5rem 0 .5rem;
+}
+.r-article blockquote {
+  border-left:3px solid var(--accent); padding:.6rem 1.1rem;
+  margin:1.25rem 0; color:var(--muted); font-style:italic;
+  font-family:var(--font-sans); font-size:1rem; line-height:1.7;
+}
+
+/* Clickable words */
+.w {
+  cursor:pointer; border-radius:3px; padding:0 1px;
+  transition:background .1s; display:inline;
+}
+.w:hover { background:var(--b1); }
 
 /* Loading skeleton */
-.rskel { display:flex; flex-direction:column; gap:.75rem; margin:1.5rem 0; }
-.rskel-line { background:var(--border); border-radius:4px; animation:pulse 1.2s ease infinite; }
+.rskel { margin:2rem 0; display:flex; flex-direction:column; gap:.8rem; }
+.rskel-line { background:var(--border); border-radius:4px; height:14px; animation:pulse 1.2s ease infinite; }
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-.rlink {
-  display:inline-flex; align-items:center; gap:.4rem; margin-top:1.75rem;
-  padding:.6rem 1.2rem; background:var(--accent); color:#fff;
-  border-radius:8px; text-decoration:none; font-size:.82rem; font-weight:500;
-  font-family:'Inter',sans-serif; transition:opacity .13s;
+/* Open original button */
+.r-open-btn {
+  display:inline-flex; align-items:center; gap:.45rem;
+  margin-top:2rem; padding:.65rem 1.35rem;
+  background:var(--accent); color:#fff; border-radius:9px;
+  text-decoration:none; font-family:var(--font-sans);
+  font-size:.85rem; font-weight:500; transition:opacity .13s;
 }
-.rlink:hover { opacity:.85; }
+.r-open-btn:hover { opacity:.85; }
+
+/* Divider */
+.r-divider { border:none; border-top:1px solid var(--border); margin:2rem 0; }
 
 /* ── WORD POPUP ── */
 .wpop {
-  position:fixed; z-index:60; background:var(--surface);
-  border:1px solid var(--border); border-radius:12px;
-  padding:.75rem 1rem 1rem; max-width:260px;
+  position:fixed; z-index:60;
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:.8rem 1rem 1rem; max-width:260px;
   box-shadow:0 8px 28px rgba(0,0,0,.13);
   opacity:0; pointer-events:none; transition:opacity .15s;
-  font-family:'Inter',sans-serif;
+  font-family:var(--font-sans);
 }
 .wpop.show { opacity:1; pointer-events:auto; }
-.wclose { position:absolute; top:.4rem; right:.6rem; background:none; border:none; font-size:.9rem; color:var(--muted); cursor:pointer; }
-.wword { font-family:'Playfair Display',serif; font-size:1.1rem; margin-bottom:.2rem; color:var(--text); }
-.wphon { font-size:.74rem; color:var(--muted); margin-bottom:.4rem; }
-.wpos  { font-size:.65rem; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:.04em; margin:.3rem 0 .1rem; }
-.wdef  { font-size:.8rem; line-height:1.55; color:var(--text); }
+.wclose { position:absolute; top:.4rem; right:.6rem; background:none; border:none; font-size:.85rem; color:var(--muted); cursor:pointer; font-family:var(--font-sans); }
+.wword { font-family:var(--font-serif); font-size:1.15rem; color:var(--text); margin-bottom:.2rem; }
+.wphon { font-size:.73rem; color:var(--muted); margin-bottom:.4rem; font-family:var(--font-sans); }
+.wpos  { font-size:.63rem; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:.05em; margin:.3rem 0 .1rem; font-family:var(--font-sans); }
+.wdef  { font-size:.82rem; line-height:1.55; color:var(--text); font-family:var(--font-sans); }
+.wloading { font-size:.8rem; color:var(--muted); font-family:var(--font-sans); }
 
 /* ── RESPONSIVE ── */
-@media(max-width:640px) {
+@media(max-width:640px){
   :root{--fh:44px;}
-  header { padding:0 1rem; }
-  .finner { padding:0 1rem; }
-  .main { padding:1rem; }
+  header,.finner { padding-left:1rem; padding-right:1rem; }
+  .main { padding:1rem; overflow:hidden; }
   .masonry { column-count:1; }
-  .sinput { width:130px; }
-  .sinput:focus { width:160px; }
-  .rbox { padding:1.25rem 1.25rem 2rem; }
-  .rtitle { font-size:1.2rem; }
-  .abody p { font-size:.95rem; }
+  .sinput { width:120px; }
+  .sinput:focus { width:150px; }
+  .r-header { padding:0 1rem; }
+  .r-body { padding:1.5rem 1rem 4rem; }
+  .r-title { font-size:1.4rem; }
+  .r-article p { font-size:1rem; }
 }
-@media(min-width:641px) and (max-width:960px) {
+@media(min-width:641px) and (max-width:960px){
   .masonry { column-count:2; }
-  .sinput { width:140px; }
 }
 </style>
 </head>
@@ -261,12 +276,16 @@ header {
   <div id="root"><div class="state"><div class="spinner"></div><h3>Loading…</h3></div></div>
 </div>
 
-<!-- READER -->
+<!-- READER — full page -->
 <div class="overlay" id="overlay">
-  <div class="rbox" id="rbox">
-    <button class="rclose" id="rclose">✕ Close</button>
-    <div id="rcontent"></div>
+  <div class="r-header">
+    <button class="r-back" id="r-back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </button>
+    <div class="r-meta-badge" id="r-badge"></div>
   </div>
+  <div class="r-body" id="r-body"></div>
 </div>
 
 <!-- WORD POPUP -->
@@ -276,15 +295,26 @@ header {
 </div>
 
 <script>
+// ── State ─────────────────────────────────────────────────────────────────────
 let ALL = [], ARTICLES = [];
 let F = {level:'all', topic:'all', source:'all'}, Q = '';
-let CACHE = {}, popWord = null;
+let DICT = {}, popWord = null;
 
-// ── Utils ─────────────────────────────────────────────────────────────────────
+// ── Sanitize ──────────────────────────────────────────────────────────────────
 function h(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Strip any remaining HTML tags from a plain-text string (server may send them)
+function stripTags(s){
+  return String(s||'')
+    .replace(/<\/?(p|div|br|span|a|strong|em|b|i|ul|li|ol)[^>]*>/gi,' ')
+    .replace(/<[^>]+>/g,'')
+    .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#\d+;/g,'').replace(/&[a-z]+;/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+
 function fmtDate(s){
   const d = new Date(s);
-  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
 }
 function isJunk(a){
   if (!a.title || a.title.length < 20) return true;
@@ -293,7 +323,7 @@ function isJunk(a){
   return false;
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
+// ── Render cards ──────────────────────────────────────────────────────────────
 function render(){
   const list = ALL.filter(a => {
     if (isJunk(a)) return false;
@@ -307,14 +337,12 @@ function render(){
     return true;
   });
 
-  const clean = ALL.filter(a => !isJunk(a));
+  const clean = ALL.filter(a=>!isJunk(a));
   document.getElementById('stats').innerHTML =
-    list.length === clean.length
-      ? `<b>${list.length}</b> articles`
-      : `<b>${list.length}</b> of <b>${clean.length}</b> articles`;
+    list.length === clean.length ? `<b>${list.length}</b> articles` : `<b>${list.length}</b> of <b>${clean.length}</b> articles`;
 
-  if (!list.length){
-    document.getElementById('root').innerHTML = '<div class="state"><h3>No results</h3><p>Try different filters.</p></div>';
+  if(!list.length){
+    document.getElementById('root').innerHTML='<div class="state"><h3>No results</h3><p>Try different filters.</p></div>';
     return;
   }
 
@@ -322,13 +350,14 @@ function render(){
     '<div class="masonry">' +
     list.map(a => {
       const idx = ARTICLES.indexOf(a);
+      const desc = stripTags(a.desc||'');
       return `<div class="card" data-idx="${idx}">
         <div class="cmeta">
           <span class="csrc">${h(a.source)}</span>
           <span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span>
         </div>
         <div class="ctitle">${h(a.title)}</div>
-        ${a.desc ? `<div class="cdesc">${h(a.desc)}</div>` : ''}
+        ${desc ? `<div class="cdesc">${h(desc)}</div>` : ''}
         <div class="cfoot">
           <span class="cdate">${fmtDate(a.date)}</span>
           <span class="ctopic">${h(a.topic)}</span>
@@ -342,21 +371,21 @@ function render(){
   });
 }
 
-// ── Load ──────────────────────────────────────────────────────────────────────
+// ── Load news ─────────────────────────────────────────────────────────────────
 async function loadAll(){
-  document.getElementById('stats').textContent = '';
-  document.getElementById('root').innerHTML = '<div class="state"><div class="spinner"></div><h3>Loading articles…</h3></div>';
+  document.getElementById('stats').textContent='';
+  document.getElementById('root').innerHTML='<div class="state"><div class="spinner"></div><h3>Loading articles…</h3></div>';
   try {
-    const res  = await fetch('/api/news');
-    if (!res.ok) throw new Error('HTTP '+res.status);
+    const res = await fetch('/api/news');
+    if(!res.ok) throw new Error('HTTP '+res.status);
     const data = await res.json();
-    ARTICLES = data.articles || [];
+    ARTICLES = data.articles||[];
     ALL = ARTICLES;
     document.getElementById('updated').textContent =
       'Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     render();
   } catch(e){
-    document.getElementById('root').innerHTML =
+    document.getElementById('root').innerHTML=
       `<div class="state"><h3>Could not load</h3><p>${e.message}</p><button class="retry" onclick="loadAll()">Retry</button></div>`;
   }
 }
@@ -364,39 +393,44 @@ async function loadAll(){
 // ── Reader ────────────────────────────────────────────────────────────────────
 async function openReader(idx){
   const a = ARTICLES[idx];
-  if (!a) return;
+  if(!a) return;
 
-  // Show overlay immediately with title + loading skeleton
-  document.getElementById('rcontent').innerHTML =
-    `<div class="rmeta">
-       <span class="csrc">${h(a.source)}</span>
-       <span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span>
-       <span class="cdate" style="margin-left:auto">${fmtDate(a.date)}</span>
+  // Update badge in reader header
+  document.getElementById('r-badge').innerHTML =
+    `<span class="csrc">${h(a.source)}</span>
+     <span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span>`;
+
+  // Show skeleton
+  document.getElementById('r-body').innerHTML =
+    `<div class="r-eyebrow">
+       <span class="r-source">${h(a.source)}</span>
+       <span class="r-dot"></span>
+       <span class="r-date">${fmtDate(a.date)}</span>
      </div>
-     <div class="rtitle">${h(a.title)}</div>
-     <div class="rhint">💡 Tap any word to see its definition</div>
+     <div class="r-title">${h(a.title)}</div>
+     <hr class="r-divider">
      <div class="rskel">
-       <div class="rskel-line" style="height:14px;width:100%"></div>
-       <div class="rskel-line" style="height:14px;width:92%"></div>
-       <div class="rskel-line" style="height:14px;width:96%"></div>
-       <div class="rskel-line" style="height:14px;width:85%"></div>
-       <div class="rskel-line" style="height:14px;width:100%"></div>
-       <div class="rskel-line" style="height:14px;width:88%"></div>
+       <div class="rskel-line" style="width:100%"></div>
+       <div class="rskel-line" style="width:94%"></div>
+       <div class="rskel-line" style="width:97%"></div>
+       <div class="rskel-line" style="width:88%"></div>
+       <div class="rskel-line" style="width:100%"></div>
+       <div class="rskel-line" style="width:91%"></div>
+       <div class="rskel-line" style="width:96%"></div>
+       <div class="rskel-line" style="width:85%"></div>
      </div>`;
 
   document.getElementById('overlay').classList.add('open');
+  document.getElementById('overlay').scrollTop = 0;
   document.body.style.overflow = 'hidden';
-  document.getElementById('rbox').scrollTop = 0;
 
-  // Fetch full article
+  // Fetch full article from server
   try {
     const res  = await fetch('/api/article?url='+encodeURIComponent(a.url));
     const data = await res.json();
-
-    if (data.ok && data.blocks && data.blocks.length > 0){
+    if(data.ok && data.blocks && data.blocks.length >= 2){
       renderArticle(a, data.blocks);
     } else {
-      // Fallback: show desc + link
       renderFallback(a);
     }
   } catch {
@@ -405,57 +439,65 @@ async function openReader(idx){
 }
 
 function tokenize(text){
-  // Split into word/non-word tokens, wrap words in clickable spans
-  return text.split(/(\b)/).map(tok => {
-    if (/^[a-zA-Z]{2,}$/.test(tok)){
-      return `<span class="w" data-word="${tok.toLowerCase()}">${tok}</span>`;
-    }
-    return tok;
+  return text.split(/(\b)/).map(tok =>
+    /^[a-zA-Z]{2,}$/.test(tok)
+      ? `<span class="w" data-word="${tok.toLowerCase()}">${tok}</span>`
+      : tok
+  ).join('');
+}
+
+function articleBodyHtml(blocks){
+  return blocks.map(b => {
+    const tok = tokenize(b.text);
+    if(b.tag==='h1'||b.tag==='h2') return `<h2>${tok}</h2>`;
+    if(b.tag==='h3'||b.tag==='h4') return `<h3>${tok}</h3>`;
+    if(b.tag==='blockquote') return `<blockquote>${tok}</blockquote>`;
+    return `<p>${tok}</p>`;
   }).join('');
 }
 
 function renderArticle(a, blocks){
-  let bodyHtml = '';
-  for (const b of blocks){
-    const tok = tokenize(b.text);
-    if (b.tag === 'h2' || b.tag === 'h1') bodyHtml += `<h2>${tok}</h2>`;
-    else if (b.tag === 'h3' || b.tag === 'h4') bodyHtml += `<h3>${tok}</h3>`;
-    else if (b.tag === 'blockquote') bodyHtml += `<blockquote>${tok}</blockquote>`;
-    else bodyHtml += `<p>${tok}</p>`;
-  }
-
-  document.getElementById('rcontent').innerHTML =
-    `<div class="rmeta">
-       <span class="csrc">${h(a.source)}</span>
-       <span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span>
-       <span class="cdate" style="margin-left:auto">${fmtDate(a.date)}</span>
+  document.getElementById('r-body').innerHTML =
+    `<div class="r-eyebrow">
+       <span class="r-source">${h(a.source)}</span>
+       <span class="r-dot"></span>
+       <span class="r-date">${fmtDate(a.date)}</span>
+       <span class="r-dot"></span>
+       <span class="ctopic" style="font-size:.7rem">${h(a.topic)}</span>
      </div>
-     <div class="rtitle">${h(a.title)}</div>
-     <div class="rhint">💡 Tap any word to see its definition</div>
-     <div class="abody">${bodyHtml}</div>
-     <a class="rlink" href="${h(a.url)}" target="_blank" rel="noopener noreferrer">Open original →</a>`;
-
+     <div class="r-title">${h(a.title)}</div>
+     <hr class="r-divider">
+     <div class="r-hint">💡 Tap any word to see its definition</div>
+     <div class="r-article">${articleBodyHtml(blocks)}</div>
+     <hr class="r-divider">
+     <a class="r-open-btn" href="${h(a.url)}" target="_blank" rel="noopener noreferrer">
+       Open original article
+       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+     </a>`;
   attachWordHandlers();
 }
 
 function renderFallback(a){
-  const tok = tokenize(a.desc || '');
-  document.getElementById('rcontent').innerHTML =
-    `<div class="rmeta">
-       <span class="csrc">${h(a.source)}</span>
-       <span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span>
-       <span class="cdate" style="margin-left:auto">${fmtDate(a.date)}</span>
+  const desc = stripTags(a.desc||'');
+  document.getElementById('r-body').innerHTML =
+    `<div class="r-eyebrow">
+       <span class="r-source">${h(a.source)}</span>
+       <span class="r-dot"></span>
+       <span class="r-date">${fmtDate(a.date)}</span>
      </div>
-     <div class="rtitle">${h(a.title)}</div>
-     ${a.desc ? `<div class="rhint">💡 Tap any word to see its definition</div>
-     <div class="abody"><p>${tok}</p></div>` : ''}
-     <a class="rlink" href="${h(a.url)}" target="_blank" rel="noopener noreferrer">Read full article →</a>`;
-
+     <div class="r-title">${h(a.title)}</div>
+     <hr class="r-divider">
+     ${desc ? `<div class="r-hint">💡 Tap any word to see its definition</div>
+     <div class="r-article"><p>${tokenize(desc)}</p></div><hr class="r-divider">` : ''}
+     <a class="r-open-btn" href="${h(a.url)}" target="_blank" rel="noopener noreferrer">
+       Read full article
+       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+     </a>`;
   attachWordHandlers();
 }
 
 function attachWordHandlers(){
-  document.querySelectorAll('#rcontent .w').forEach(el => {
+  document.querySelectorAll('#r-body .w').forEach(el => {
     el.addEventListener('click', e => { e.stopPropagation(); lookupWord(e, el.dataset.word); });
   });
 }
@@ -466,35 +508,32 @@ function closeReader(){
   closePopup();
 }
 
-document.getElementById('overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('overlay')) closeReader();
-});
-document.getElementById('rclose').addEventListener('click', closeReader);
+document.getElementById('r-back').addEventListener('click', closeReader);
 document.getElementById('logo').addEventListener('click', closeReader);
-document.addEventListener('keydown', e => { if (e.key==='Escape') closeReader(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeReader(); });
 
 // ── Word lookup ───────────────────────────────────────────────────────────────
 async function lookupWord(e, word){
-  if (popWord === word){ closePopup(); return; }
+  if(popWord===word){ closePopup(); return; }
   popWord = word;
 
   const pop  = document.getElementById('wpop');
   const body = document.getElementById('wbody');
 
-  const x = Math.min(e.clientX + 8, window.innerWidth - 275);
-  const y = Math.min(e.clientY + 20, window.innerHeight - 180);
+  const x = Math.min(e.clientX+8, window.innerWidth-275);
+  const y = Math.min(e.clientY+20, window.innerHeight-190);
   pop.style.left = x+'px';
   pop.style.top  = y+'px';
-  body.innerHTML = `<div class="wword">${word}</div><div class="wdef" style="color:var(--muted)">Looking up…</div>`;
+  body.innerHTML = `<div class="wword">${word}</div><div class="wloading">Looking up…</div>`;
   pop.classList.add('show');
 
-  if (CACHE[word]){ renderPopup(CACHE[word]); return; }
+  if(DICT[word]){ renderPopup(DICT[word]); return; }
 
   try {
     const res  = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-    if (!res.ok) throw new Error();
+    if(!res.ok) throw new Error();
     const data = await res.json();
-    CACHE[word] = data[0];
+    DICT[word] = data[0];
     renderPopup(data[0]);
   } catch {
     body.innerHTML = `<div class="wword">${word}</div><div class="wdef" style="color:var(--muted)">No definition found.</div>`;
@@ -502,13 +541,13 @@ async function lookupWord(e, word){
 }
 
 function renderPopup(entry){
-  const phon = entry.phonetics?.find(p=>p.text)?.text || '';
+  const phon = entry.phonetics?.find(p=>p.text)?.text||'';
   const meanings = (entry.meanings||[]).slice(0,2);
   let html = `<div class="wword">${entry.word}</div>`;
-  if (phon) html += `<div class="wphon">${phon}</div>`;
+  if(phon) html += `<div class="wphon">${phon}</div>`;
   meanings.forEach(m => {
     const def = m.definitions?.[0]?.definition||'';
-    if (def) html += `<div class="wpos">${m.partOfSpeech}</div><div class="wdef">${def}</div>`;
+    if(def) html += `<div class="wpos">${m.partOfSpeech}</div><div class="wdef">${def}</div>`;
   });
   document.getElementById('wbody').innerHTML = html;
 }
@@ -521,7 +560,7 @@ function closePopup(){
 document.getElementById('wclose').addEventListener('click', closePopup);
 document.addEventListener('click', e => {
   const pop = document.getElementById('wpop');
-  if (pop.classList.contains('show') && !pop.contains(e.target) && !e.target.classList.contains('w')) closePopup();
+  if(pop.classList.contains('show') && !pop.contains(e.target) && !e.target.classList.contains('w')) closePopup();
 });
 
 // ── Filters ───────────────────────────────────────────────────────────────────
@@ -534,11 +573,9 @@ document.querySelectorAll('.pill').forEach(btn => {
   });
 });
 
-document.getElementById('search').addEventListener('input', e => {
-  Q = e.target.value.trim();
-  render();
-});
+document.getElementById('search').addEventListener('input', e => { Q=e.target.value.trim(); render(); });
 
+// ── Init ──────────────────────────────────────────────────────────────────────
 loadAll();
 setInterval(loadAll, 15*60*1000);
 </script>
