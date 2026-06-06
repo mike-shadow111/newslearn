@@ -47,10 +47,24 @@ function parseXml(xml, source) {
 
     const title = stripHtml(get('title'));
     const link  = get('link') || getAttr('link', 'href');
-    const desc  = stripHtml(get('description') || get('summary') || get('content')).slice(0, 400);
-    const date  = get('pubDate') || get('published') || get('updated') || '';
+    let desc    = stripHtml(get('description') || get('summary') || get('content'));
 
-    if (title && link) items.push({ title, desc, url: link, date, source });
+    // Remove newsletter/promo junk that Guardian/BBC put in descriptions
+    desc = desc
+      .replace(/Get our .{0,120}(email|podcast|newsletter|app)[^.]*\./gi, '')
+      .replace(/Sign up .{0,120}\./gi, '')
+      .replace(/Subscribe .{0,120}\./gi, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 300);
+
+    const date = get('pubDate') || get('published') || get('updated') || '';
+
+    // Skip junk: no title, too short title, no valid http link, or title looks like nav/promo
+    const isJunk = !title || title.length < 10 || !link.startsWith('http') ||
+      /^(get our|sign up|subscribe|newsletter|breaking news|live updates?$)/i.test(title);
+
+    if (!isJunk) items.push({ title, desc, url: link, date, source });
   }
   return items;
 }
