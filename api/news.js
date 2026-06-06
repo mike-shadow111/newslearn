@@ -13,12 +13,13 @@ const FEEDS = [
   { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',  source: 'NY Times' },
 ];
 
-function fetchUrl(url) {
+function fetchUrl(url, redirects = 0) {
+  if (redirects > 3) return Promise.reject(new Error('too many redirects'));
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http;
-    const req = client.get(url, { headers: { 'User-Agent': 'Newslearn/1.0' } }, res => {
+    const req = client.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 Newslearn/1.0' } }, res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return fetchUrl(res.headers.location).then(resolve).catch(reject);
+        return fetchUrl(res.headers.location, redirects + 1).then(resolve).catch(reject);
       }
       let data = '';
       res.on('data', chunk => data += chunk);
@@ -31,32 +32,45 @@ function fetchUrl(url) {
 
 function stripHtml(s) {
   return (s || '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<[^>]+>/g, ' ')
-    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"').replace(/&#\d+;/g, ' ').replace(/&[a-z]+;/g, ' ')
-    .replace(/\s+/g, ' ').trim();
+    .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+    .replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g, '')
+    .replace(/&[a-z]+;/g,' ')
+    .replace(/\s+/g,' ').trim();
 }
 
-function cleanDesc(s) {
-  return (s || '')
-    .replace(/Get our .{0,150}/gi, '')
-    .replace(/Sign up .{0,150}/gi, '')
-    .replace(/Subscribe .{0,150}/gi, '')
-    .replace(/Click here .{0,100}/gi, '')
-    .replace(/Read more .{0,100}/gi, '')
-    .replace(/\s+/g, ' ').trim()
-    .slice(0, 280);
+function cleanDesc(raw) {
+  let s = stripHtml(raw);
+  // Remove newsletter/promo sentences
+  s = s.replace(/\b(Get our|Sign up (for|to)|Subscribe (to|for)|Click here|Read more|More from|Follow us)[^.!?]*[.!?]/gi, '');
+  // Remove lone URLs
+  s = s.replace(/https?:\/\/\S+/g, '');
+  // Remove "X Jun", "6 Jun Health" type date/tag fragments at start
+  s = s.replace(/^\d{1,2}\s+\w+\s*/,'');
+  s = s.replace(/\s+/g,' ').trim();
+  return s.slice(0, 300);
+}
+
+function extractItems(xml) {
+  // Strip <image> blocks first so their <title> doesn't bleed into item parsing
+  xml = xml.replace(/<image[\s\S]*?<\/image>/gi, '');
+  // Also strip <textInput> blocks
+  xml = xml.replace(/<textInput[\s\S]*?<\/textInput>/gi, '');
+  return xml.match(/<item[\s\S]*?<\/item>/g)
+      || xml.match(/<entry[\s\S]*?<\/entry>/g)
+      || [];
 }
 
 function parseXml(xml, source) {
   const items = [];
-  const blocks = xml.match(/<item[\s\S]*?<\/item>/g)
-               || xml.match(/<entry[\s\S]*?<\/entry>/g) || [];
+  const blocks = extractItems(xml);
 
-  for (const block of blocks.slice(0, 25)) {
-    const get = (tag) => {
+  for (const block of blocks.slice(0, 30)) {
+    const get = tag => {
       const m = block.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`, 'i'))
-             || block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
+             || block.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'i'));
       return m ? m[1].trim() : '';
     };
     const getAttr = (tag, attr) => {
@@ -66,17 +80,16 @@ function parseXml(xml, source) {
 
     const title = stripHtml(get('title'));
     const link  = get('link') || getAttr('link', 'href');
-    const raw   = get('description') || get('summary') || get('content') || '';
-    const desc  = cleanDesc(stripHtml(raw));
+    const desc  = cleanDesc(get('description') || get('summary') || get('content'));
     const date  = get('pubDate') || get('published') || get('updated') || '';
 
-    // Hard filters: must have real title and valid URL
-    if (!title || title.length < 15) continue;
-    if (!link || !link.startsWith('http')) continue;
-    // Skip nav/promo items
-    if (/^(get our|sign up|subscribe|live$|live updates|breaking news)/i.test(title)) continue;
-    // Skip if title looks like a sentence fragment (no capital first letter after trim)
-    if (!/^[A-Z"'«]/.test(title)) continue;
+    // ── Hard filters ──
+    if (!title || title.length < 20) continue;           // too short = not a headline
+    if (!link || !link.startsWith('http')) continue;     // no valid URL
+    if (/^(get our|sign up|subscribe|live$|breaking news|more from|follow us)/i.test(title)) continue;
+    if (!/^[A-Z"'«\d([]/.test(title)) continue;         // must start with capital/quote/number
+    if (title.split(' ').length < 4) continue;           // less than 4 words = not a headline
+    if (/^https?:\/\//.test(title)) continue;            // title is a URL
 
     items.push({ title, desc, url: link, date, source });
   }
@@ -116,22 +129,26 @@ function estimateLevel(text) {
 }
 
 function guessTopic(t, d) {
-  const s = ((t || '') + ' ' + (d || '')).toLowerCase();
-  if (/\b(ai|tech|software|apple|google|microsoft|robot|cyber|chip|iphone|android|startup|openai|nvidia|meta)\b/.test(s)) return 'technology';
-  if (/\b(space|nasa|climate|planet|science|study|research|biology|physics|chemistry|asteroid|quantum|genome)\b/.test(s)) return 'science';
-  if (/\b(health|cancer|virus|hospital|doctor|mental|fitness|obesity|drug|vaccine|disease|treatment|covid|ebola)\b/.test(s)) return 'health';
-  if (/\b(market|economy|stock|inflation|bank|trade|invest|gdp|recession|company|revenue|profit|crypto|bitcoin)\b/.test(s)) return 'business';
+  const s = ((t||'')+(d||'')).toLowerCase();
+  if (/\b(ai|tech|software|apple|google|microsoft|robot|cyber|chip|iphone|android|startup|openai|nvidia|meta|app\b)\b/.test(s)) return 'technology';
+  if (/\b(space|nasa|climate|planet|science|biolog|physics|chemist|asteroid|quantum|genome|species|fossil)\b/.test(s)) return 'science';
+  if (/\b(health|cancer|virus|hospital|doctor|mental|fitness|obesity|drug|vaccine|disease|treatment|covid|ebola|outbreak)\b/.test(s)) return 'health';
+  if (/\b(market|economy|stock|inflation|bank|trade|invest|gdp|recession|revenue|profit|crypto|bitcoin|tariff)\b/.test(s)) return 'business';
   return 'world';
 }
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate');
+  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=60');
 
-  const results = await Promise.allSettled(FEEDS.map(async feed => {
-    const xml = await fetchUrl(feed.url);
-    return parseXml(xml, feed.source);
-  }));
+  const results = await Promise.allSettled(
+    FEEDS.map(async feed => {
+      try {
+        const xml = await fetchUrl(feed.url);
+        return parseXml(xml, feed.source);
+      } catch { return []; }
+    })
+  );
 
   let articles = results
     .filter(r => r.status === 'fulfilled')
@@ -142,10 +159,10 @@ module.exports = async (req, res) => {
       topic: guessTopic(a.title, a.desc),
     }));
 
-  // Deduplicate by title
+  // Deduplicate
   const seen = new Set();
   articles = articles.filter(a => {
-    const key = a.title.slice(0, 60).toLowerCase();
+    const key = a.title.slice(0, 60).toLowerCase().replace(/[^a-z0-9]/g,'');
     if (seen.has(key)) return false;
     seen.add(key); return true;
   });

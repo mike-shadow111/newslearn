@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Newslearn — Read English, Learn English</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --bg:      #f7f4ef;
@@ -19,139 +20,139 @@
   --a2:      #dcfce7; --a2t: #166534;
   --b1:      #fef9c3; --b1t: #854d0e;
   --b2:      #fee2e2; --b2t: #991b1b;
+  --header-h: 56px;
+  --filter-h: 48px;
 }
 
-body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh;
+  -webkit-text-size-adjust: 100%;
+}
 
-/* HEADER */
+/* ── HEADER ── */
 header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   padding: 0 1.5rem;
-  height: 56px;
+  height: var(--header-h);
   display: flex; align-items: center; justify-content: space-between;
   position: sticky; top: 0; z-index: 30;
 }
-.logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--accent); }
+.logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--accent); user-select: none; }
 .logo span { color: var(--text); }
-.updated { font-size: .72rem; color: var(--muted); }
+#updated { font-size: .72rem; color: var(--muted); white-space: nowrap; }
 
-/* FILTER BAR */
+/* ── FILTER BAR ── */
 .filter-bar {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  position: sticky; top: 56px; z-index: 20;
-  overflow-x: auto; scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+  position: sticky; top: var(--header-h); z-index: 20;
+  overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
 .filter-bar::-webkit-scrollbar { display: none; }
 .filter-inner {
-  display: flex; align-items: center; gap: 0;
-  padding: 0 1.5rem;
-  min-width: max-content;
-  height: 48px;
+  display: flex; align-items: center;
+  padding: 0 1.5rem; height: var(--filter-h);
+  min-width: max-content; gap: 0;
 }
-.filter-group { display: flex; align-items: center; gap: 5px; padding-right: 1.25rem; }
-.filter-group + .filter-group { padding-left: 1.25rem; border-left: 1px solid var(--border); }
-.flabel { font-size: .65rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-right: 3px; }
-
+.fg { display: flex; align-items: center; gap: 4px; }
+.fg + .fg { margin-left: 1rem; padding-left: 1rem; border-left: 1px solid var(--border); }
+.flabel {
+  font-size: .63rem; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .07em; margin-right: 2px; white-space: nowrap;
+}
 .pill {
-  padding: 3px 11px; border-radius: 100px;
+  padding: 3px 10px; border-radius: 100px;
   border: 1px solid var(--border); background: transparent;
-  font-family: 'Inter', sans-serif; font-size: .75rem; color: var(--muted);
-  cursor: pointer; transition: all .15s; white-space: nowrap; line-height: 1.6;
+  font-family: 'Inter', sans-serif; font-size: .74rem; color: var(--muted);
+  cursor: pointer; transition: all .12s; white-space: nowrap; line-height: 1.7;
+  -webkit-tap-highlight-color: transparent;
 }
-.pill:hover { border-color: var(--accent); color: var(--accent); }
+.pill:hover  { border-color: var(--accent); color: var(--accent); }
 .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-/* SEARCH — отдельная строка на мобильном */
-.search-row {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 8px 1rem;
-  display: none;
-}
-.search-row input {
-  width: 100%; padding: 7px 12px 7px 32px;
+/* search in filter bar (desktop) */
+.fg-search { margin-left: auto; }
+.sinput {
+  padding: 3px 10px 3px 28px;
   border: 1px solid var(--border); border-radius: 100px;
   background: var(--bg); font-family: 'Inter', sans-serif;
-  font-size: .85rem; color: var(--text); outline: none;
-}
-.search-row input:focus { border-color: var(--accent); }
-.search-wrap { position: relative; }
-.search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); }
-
-/* десктоп-поиск в filter-bar */
-.search-desktop { margin-left: auto; padding-left: 1.25rem; border-left: 1px solid var(--border); }
-.search-desktop input {
-  padding: 4px 10px 4px 28px;
-  border: 1px solid var(--border); border-radius: 100px;
-  background: var(--bg); font-family: 'Inter', sans-serif;
-  font-size: .78rem; color: var(--text); width: 180px; outline: none;
+  font-size: .75rem; color: var(--text); width: 170px; outline: none;
   transition: border-color .15s;
 }
-.search-desktop input:focus { border-color: var(--accent); }
-.search-desktop .search-wrap svg { left: 8px; }
-
-/* MAIN */
-.main { max-width: 1180px; margin: 0 auto; padding: 1.5rem; }
-.stats { font-size: .78rem; color: var(--muted); margin-bottom: 1.25rem; }
-.stats b { color: var(--text); }
-
-/* MASONRY via columns — no holes ever */
-.masonry {
-  columns: 3 300px;
-  column-gap: 1rem;
+.sinput:focus { border-color: var(--accent); }
+.sicon {
+  position: absolute; left: 9px; top: 50%;
+  transform: translateY(-50%); pointer-events: none;
 }
+.swrap { position: relative; }
 
-/* CARD */
+/* mobile search row */
+.search-mobile {
+  display: none;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 8px 1rem;
+  position: sticky; top: calc(var(--header-h) + var(--filter-h)); z-index: 19;
+}
+.search-mobile .sinput { width: 100%; padding-left: 32px; font-size: .85rem; }
+.search-mobile .sicon { left: 11px; }
+
+/* ── MAIN ── */
+.main { max-width: 1180px; margin: 0 auto; padding: 1.25rem 1.5rem; }
+#stats { font-size: .78rem; color: var(--muted); margin-bottom: 1rem; }
+#stats b { color: var(--text); }
+
+/* ── MASONRY — no holes possible ── */
+.masonry { columns: 3 290px; column-gap: 1rem; }
+
+/* ── CARD ── */
 .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.1rem 1.15rem;
-  display: flex; flex-direction: column; gap: .6rem;
-  text-decoration: none; color: inherit;
-  transition: transform .15s, box-shadow .15s;
-  break-inside: avoid;
-  margin-bottom: 1rem;
-  cursor: pointer;
+  display: block; text-decoration: none; color: inherit;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1rem 1.1rem;
+  break-inside: avoid; margin-bottom: 1rem;
+  transition: transform .13s, box-shadow .13s;
+  -webkit-tap-highlight-color: transparent;
 }
 .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.08); }
 
-.card-meta { display: flex; align-items: center; justify-content: space-between; }
-.csource { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
-.lvl { font-size: .65rem; font-weight: 600; padding: 2px 7px; border-radius: 100px; }
+.cmeta  { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+.csrc   { font-size: .63rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.lvl    { font-size: .63rem; font-weight: 600; padding: 2px 7px; border-radius: 100px; }
 .lvl-a2 { background: var(--a2); color: var(--a2t); }
 .lvl-b1 { background: var(--b1); color: var(--b1t); }
 .lvl-b2 { background: var(--b2); color: var(--b2t); }
 
 .ctitle {
   font-family: 'Playfair Display', serif;
-  font-size: .98rem; line-height: 1.4; color: var(--text);
+  font-size: .97rem; line-height: 1.42; color: var(--text);
+  margin-bottom: .45rem;
 }
 .cdesc {
-  font-size: .8rem; color: var(--muted); line-height: 1.6;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  font-size: .79rem; color: var(--muted); line-height: 1.62;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden; margin-bottom: .6rem;
 }
 .cfoot {
   display: flex; align-items: center; justify-content: space-between;
-  padding-top: .6rem; border-top: 1px solid var(--border); margin-top: auto;
+  padding-top: .55rem; border-top: 1px solid var(--border);
 }
-.cdate { font-size: .7rem; color: var(--muted); }
+.cdate  { font-size: .68rem; color: var(--muted); }
 .ctopic {
-  font-size: .65rem; font-weight: 600; padding: 2px 7px; border-radius: 4px;
+  font-size: .63rem; font-weight: 600; padding: 2px 7px; border-radius: 4px;
   background: var(--accent2); color: var(--accent); text-transform: capitalize;
 }
 
-/* STATE */
-.state-box { padding: 4rem 1rem; text-align: center; color: var(--muted); }
-.state-box h3 { font-family: 'Playfair Display', serif; color: var(--text); margin-bottom: .5rem; font-size: 1.1rem; }
-.state-box p { font-size: .82rem; line-height: 1.7; max-width: 380px; margin: 0 auto; }
-.spinner {
+/* ── STATES ── */
+.state { padding: 4rem 1rem; text-align: center; color: var(--muted); }
+.state h3 { font-family: 'Playfair Display', serif; color: var(--text); margin-bottom: .4rem; font-size: 1.1rem; }
+.state p  { font-size: .82rem; line-height: 1.7; max-width: 360px; margin: 0 auto; }
+.spinner  {
   width: 32px; height: 32px; border: 3px solid var(--border);
   border-top-color: var(--accent); border-radius: 50%;
-  animation: spin .8s linear infinite; margin: 0 auto 1rem;
+  animation: spin .75s linear infinite; margin: 0 auto 1rem;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .retry {
@@ -159,18 +160,24 @@ header {
   background: var(--accent); color: #fff; border: none; border-radius: 8px;
   font-family: 'Inter', sans-serif; font-size: .82rem; font-weight: 500; cursor: pointer;
 }
+.retry:hover { opacity: .85; }
 
-/* MOBILE */
+/* ── RESPONSIVE ── */
 @media (max-width: 640px) {
+  :root { --filter-h: 44px; }
   header { padding: 0 1rem; }
-  .search-desktop { display: none; }
-  .search-row { display: block; position: sticky; top: 104px; z-index: 19; }
+  .filter-inner { padding: 0 1rem; }
+  .fg-search { display: none; }
+  .search-mobile { display: block; }
   .main { padding: 1rem; }
   .masonry { columns: 1; }
-  .filter-inner { height: 44px; padding: 0 1rem; }
 }
-@media (min-width: 641px) and (max-width: 900px) {
+@media (min-width: 641px) and (max-width: 960px) {
+  .fg-search { display: none; }
   .masonry { columns: 2 280px; }
+}
+@media (min-width: 961px) {
+  .fg-search { display: flex; }
 }
 </style>
 </head>
@@ -178,19 +185,19 @@ header {
 
 <header>
   <div class="logo">News<span>learn</span></div>
-  <span class="updated" id="updated"></span>
+  <span id="updated"></span>
 </header>
 
 <div class="filter-bar">
   <div class="filter-inner">
-    <div class="filter-group">
+    <div class="fg">
       <span class="flabel">Level</span>
       <button class="pill active" data-f="level" data-v="all">All</button>
       <button class="pill" data-f="level" data-v="a2">A2</button>
       <button class="pill" data-f="level" data-v="b1">B1</button>
       <button class="pill" data-f="level" data-v="b2">B2+</button>
     </div>
-    <div class="filter-group">
+    <div class="fg">
       <span class="flabel">Topic</span>
       <button class="pill active" data-f="topic" data-v="all">All</button>
       <button class="pill" data-f="topic" data-v="technology">Tech</button>
@@ -199,61 +206,71 @@ header {
       <button class="pill" data-f="topic" data-v="business">Business</button>
       <button class="pill" data-f="topic" data-v="health">Health</button>
     </div>
-    <div class="filter-group">
+    <div class="fg">
       <span class="flabel">Source</span>
       <button class="pill active" data-f="source" data-v="all">All</button>
       <button class="pill" data-f="source" data-v="BBC">BBC</button>
       <button class="pill" data-f="source" data-v="Guardian">Guardian</button>
-      <button class="pill" data-f="source" data-v="The Verge">The Verge</button>
-      <button class="pill" data-f="source" data-v="NY Times">NY Times</button>
-      <button class="pill" data-f="source" data-v="Ars Technica">Ars Technica</button>
+      <button class="pill" data-f="source" data-v="The Verge">Verge</button>
+      <button class="pill" data-f="source" data-v="NY Times">NYT</button>
+      <button class="pill" data-f="source" data-v="Ars Technica">Ars</button>
     </div>
-    <div class="filter-group search-desktop">
-      <div class="search-wrap">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#78716c" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="search-d" placeholder="Search…">
+    <div class="fg fg-search">
+      <div class="swrap">
+        <svg class="sicon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#78716c" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="sinput" id="sd" type="search" placeholder="Search…" autocomplete="off">
       </div>
     </div>
   </div>
 </div>
 
-<!-- mobile search -->
-<div class="search-row">
-  <div class="search-wrap">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#78716c" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input type="text" id="search-m" placeholder="Search articles…">
+<div class="search-mobile">
+  <div class="swrap">
+    <svg class="sicon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#78716c" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input class="sinput" id="sm" type="search" placeholder="Search articles…" autocomplete="off">
   </div>
 </div>
 
 <div class="main">
-  <div class="stats" id="stats"></div>
-  <div id="container">
-    <div class="state-box">
-      <div class="spinner"></div>
-      <h3>Loading articles…</h3>
-      <p>Fetching from BBC, Guardian, The Verge, NY Times and Ars Technica.</p>
-    </div>
-  </div>
+  <div id="stats"></div>
+  <div id="root"><div class="state"><div class="spinner"></div><h3>Loading…</h3></div></div>
 </div>
 
 <script>
-let articles = [];
-let filters = { level:'all', topic:'all', source:'all' };
-let query = '';
+// ── State ─────────────────────────────────────────────────────────────────────
+let ALL = [];
+let F = { level:'all', topic:'all', source:'all' };
+let Q = '';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 function fmtDate(s) {
   if (!s) return '';
   const d = new Date(s);
-  return isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', {day:'numeric', month:'short'});
 }
 
-function getFiltered() {
-  return articles.filter(a => {
-    if (filters.level  !== 'all' && a.level  !== filters.level)  return false;
-    if (filters.topic  !== 'all' && a.topic  !== filters.topic)  return false;
-    if (filters.source !== 'all' && a.source !== filters.source) return false;
-    if (query) {
-      const q = query.toLowerCase();
+// Second-pass junk filter on the client side
+function isJunk(a) {
+  if (!a.title || a.title.length < 20) return true;
+  if (!a.url || !a.url.startsWith('http')) return true;
+  // Has no content at all
+  if (!a.desc && !a.title) return true;
+  // Looks like a fragment (no verb-like structure, fewer than 4 words)
+  if (a.title.trim().split(/\s+/).length < 4) return true;
+  return false;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function filtered() {
+  return ALL.filter(a => {
+    if (isJunk(a)) return false;
+    if (F.level  !== 'all' && a.level  !== F.level)  return false;
+    if (F.topic  !== 'all' && a.topic  !== F.topic)  return false;
+    if (F.source !== 'all' && a.source !== F.source) return false;
+    if (Q) {
+      const q = Q.toLowerCase();
       if (!a.title.toLowerCase().includes(q) && !(a.desc||'').toLowerCase().includes(q)) return false;
     }
     return true;
@@ -261,83 +278,74 @@ function getFiltered() {
 }
 
 function render() {
-  const list = getFiltered();
-  const container = document.getElementById('container');
+  const list = filtered();
+  const root = document.getElementById('root');
 
-  document.getElementById('stats').innerHTML = list.length === articles.length
-    ? `<b>${articles.length}</b> articles`
-    : `<b>${list.length}</b> of <b>${articles.length}</b> articles`;
+  document.getElementById('stats').innerHTML = list.length === ALL.filter(a=>!isJunk(a)).length
+    ? `<b>${list.length}</b> articles`
+    : `<b>${list.length}</b> of <b>${ALL.filter(a=>!isJunk(a)).length}</b> articles`;
 
   if (!list.length) {
-    container.innerHTML = `<div class="state-box"><h3>No results</h3><p>Try different filters or clear the search.</p></div>`;
+    root.innerHTML = `<div class="state"><h3>No results</h3><p>Try different filters or clear the search.</p></div>`;
     return;
   }
 
-  const html = list.map(a => `
-    <a class="card" href="${a.url}" target="_blank" rel="noopener noreferrer">
-      <div class="card-meta">
-        <span class="csource">${a.source}</span>
+  root.innerHTML = '<div class="masonry">' + list.map(a => `
+    <a class="card" href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">
+      <div class="cmeta">
+        <span class="csrc">${esc(a.source)}</span>
         <span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span>
       </div>
-      <div class="ctitle">${a.title}</div>
-      ${a.desc ? `<div class="cdesc">${a.desc}</div>` : ''}
+      <div class="ctitle">${esc(a.title)}</div>
+      ${a.desc ? `<div class="cdesc">${esc(a.desc)}</div>` : ''}
       <div class="cfoot">
         <span class="cdate">${fmtDate(a.date)}</span>
-        <span class="ctopic">${a.topic}</span>
+        <span class="ctopic">${esc(a.topic)}</span>
       </div>
-    </a>
-  `).join('');
-
-  container.innerHTML = `<div class="masonry">${html}</div>`;
+    </a>`).join('') + '</div>';
 }
 
+// ── Load ──────────────────────────────────────────────────────────────────────
 async function loadAll() {
   document.getElementById('stats').textContent = '';
-  document.getElementById('container').innerHTML = `
-    <div class="state-box">
-      <div class="spinner"></div>
-      <h3>Loading articles…</h3>
-      <p>Fetching from BBC, Guardian, The Verge, NY Times and Ars Technica.</p>
-    </div>`;
+  document.getElementById('root').innerHTML =
+    '<div class="state"><div class="spinner"></div><h3>Loading articles…</h3><p>Fetching from BBC, Guardian, The Verge, NY Times and Ars Technica.</p></div>';
   try {
     const res  = await fetch('/api/news');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    if (!data.ok) throw new Error('api');
-    articles = data.articles;
+    if (!data.ok) throw new Error('API error');
+    ALL = data.articles || [];
     document.getElementById('updated').textContent =
       'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
     render();
-  } catch {
-    document.getElementById('container').innerHTML = `
-      <div class="state-box">
-        <h3>Could not load articles</h3>
-        <p>Something went wrong. Make sure the project is deployed on Vercel.</p>
-        <button class="retry" onclick="loadAll()">Try again</button>
-      </div>`;
+  } catch(e) {
+    document.getElementById('root').innerHTML =
+      `<div class="state"><h3>Could not load articles</h3>
+       <p>Make sure this is deployed on Vercel, not opened as a local file.<br><small style="opacity:.6">${e.message}</small></p>
+       <button class="retry" onclick="loadAll()">Try again</button></div>`;
   }
 }
 
-// Filters
+// ── Filters ───────────────────────────────────────────────────────────────────
 document.querySelectorAll('.pill').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll(`.pill[data-f="${btn.dataset.f}"]`).forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    filters[btn.dataset.f] = btn.dataset.v;
+    F[btn.dataset.f] = btn.dataset.v;
     render();
   });
 });
 
-// Search — sync desktop and mobile inputs
-function onSearch(val) { query = val; render(); }
-document.getElementById('search-d').addEventListener('input', e => {
-  document.getElementById('search-m').value = e.target.value;
-  onSearch(e.target.value);
-});
-document.getElementById('search-m').addEventListener('input', e => {
-  document.getElementById('search-d').value = e.target.value;
-  onSearch(e.target.value);
-});
+function onSearch(val) {
+  Q = val.trim();
+  render();
+}
 
+document.getElementById('sd').addEventListener('input', e => { document.getElementById('sm').value = e.target.value; onSearch(e.target.value); });
+document.getElementById('sm').addEventListener('input', e => { document.getElementById('sd').value = e.target.value; onSearch(e.target.value); });
+
+// ── Init ──────────────────────────────────────────────────────────────────────
 loadAll();
 setInterval(loadAll, 15 * 60 * 1000);
 </script>
