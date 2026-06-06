@@ -2,194 +2,171 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Newslearn — Read English, Learn English</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Newslearn</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg:      #f7f4ef;
-  --surface: #ffffff;
-  --border:  #e8e2d9;
-  --text:    #1c1917;
-  --muted:   #78716c;
-  --accent:  #16653a;
-  --accent2: #e8f0eb;
-  --a2:      #dcfce7; --a2t: #166534;
-  --b1:      #fef9c3; --b1t: #854d0e;
-  --b2:      #fee2e2; --b2t: #991b1b;
-  --header-h: 56px;
-  --filter-h: 48px;
+  --bg:#f7f4ef; --surface:#fff; --border:#e8e2d9; --text:#1c1917; --muted:#78716c;
+  --accent:#16653a; --accent2:#e8f0eb;
+  --a2:#dcfce7; --a2t:#166534; --b1:#fef9c3; --b1t:#854d0e; --b2:#fee2e2; --b2t:#991b1b;
+  --hh:56px; --fh:48px;
 }
-
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg); color: var(--text);
-  min-height: 100vh;
-  -webkit-text-size-adjust: 100%;
-}
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; -webkit-text-size-adjust:100%; overflow-x:hidden; }
 
 /* ── HEADER ── */
-header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 0 1.5rem;
-  height: var(--header-h);
-  display: flex; align-items: center; justify-content: space-between;
-  position: sticky; top: 0; z-index: 30;
-}
-.logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--accent); user-select: none; }
-.logo span { color: var(--text); }
-#updated { font-size: .72rem; color: var(--muted); white-space: nowrap; }
+header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 1.5rem; height:var(--hh); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:40; }
+.logo { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--accent); user-select:none; cursor:pointer; }
+.logo span { color:var(--text); }
+#updated { font-size:.72rem; color:var(--muted); white-space:nowrap; }
 
 /* ── FILTER BAR ── */
-.filter-bar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  position: sticky; top: var(--header-h); z-index: 20;
-  overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
-}
-.filter-bar::-webkit-scrollbar { display: none; }
-.filter-inner {
-  display: flex; align-items: center;
-  padding: 0 1.5rem; height: var(--filter-h);
-  min-width: max-content; gap: 0;
-}
-.fg { display: flex; align-items: center; gap: 4px; }
-.fg + .fg { margin-left: 1rem; padding-left: 1rem; border-left: 1px solid var(--border); }
-.flabel {
-  font-size: .63rem; font-weight: 600; color: var(--muted);
-  text-transform: uppercase; letter-spacing: .07em; margin-right: 2px; white-space: nowrap;
-}
-.pill {
-  padding: 3px 10px; border-radius: 100px;
-  border: 1px solid var(--border); background: transparent;
-  font-family: 'Inter', sans-serif; font-size: .74rem; color: var(--muted);
-  cursor: pointer; transition: all .12s; white-space: nowrap; line-height: 1.7;
-  -webkit-tap-highlight-color: transparent;
-}
-.pill:hover  { border-color: var(--accent); color: var(--accent); }
-.pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.fbar { background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:var(--hh); z-index:30; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.fbar::-webkit-scrollbar { display:none; }
+.finner { display:flex; align-items:center; padding:0 1.5rem; height:var(--fh); min-width:max-content; }
+.fg { display:flex; align-items:center; gap:4px; }
+.fg+.fg { margin-left:.9rem; padding-left:.9rem; border-left:1px solid var(--border); }
+.flabel { font-size:.63rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-right:2px; white-space:nowrap; }
+.pill { padding:3px 10px; border-radius:100px; border:1px solid var(--border); background:transparent; font-family:'Inter',sans-serif; font-size:.74rem; color:var(--muted); cursor:pointer; transition:all .12s; white-space:nowrap; line-height:1.7; -webkit-tap-highlight-color:transparent; }
+.pill:hover { border-color:var(--accent); color:var(--accent); }
+.pill.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.fg-search { margin-left:auto; }
+.swrap { position:relative; }
+.sinput { padding:3px 10px 3px 28px; border:1px solid var(--border); border-radius:100px; background:var(--bg); font-family:'Inter',sans-serif; font-size:.75rem; color:var(--text); width:170px; outline:none; transition:border-color .15s; }
+.sinput:focus { border-color:var(--accent); }
+.sico { position:absolute; left:9px; top:50%; transform:translateY(-50%); pointer-events:none; }
 
-/* search in filter bar (desktop) */
-.fg-search { margin-left: auto; }
-.sinput {
-  padding: 3px 10px 3px 28px;
-  border: 1px solid var(--border); border-radius: 100px;
-  background: var(--bg); font-family: 'Inter', sans-serif;
-  font-size: .75rem; color: var(--text); width: 170px; outline: none;
-  transition: border-color .15s;
-}
-.sinput:focus { border-color: var(--accent); }
-.sicon {
-  position: absolute; left: 9px; top: 50%;
-  transform: translateY(-50%); pointer-events: none;
-}
-.swrap { position: relative; }
-
-/* mobile search row */
-.search-mobile {
-  display: none;
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  padding: 8px 1rem;
-  position: sticky; top: calc(var(--header-h) + var(--filter-h)); z-index: 19;
-}
-.search-mobile .sinput { width: 100%; padding-left: 32px; font-size: .85rem; }
-.search-mobile .sicon { left: 11px; }
+/* mobile search */
+.smob { display:none; background:var(--surface); border-bottom:1px solid var(--border); padding:8px 1rem; position:sticky; top:calc(var(--hh) + var(--fh)); z-index:29; }
+.smob .sinput { width:100%; padding-left:32px; font-size:.85rem; }
+.smob .sico { left:11px; }
 
 /* ── MAIN ── */
-.main { max-width: 1180px; margin: 0 auto; padding: 1.25rem 1.5rem; }
-#stats { font-size: .78rem; color: var(--muted); margin-bottom: 1rem; }
-#stats b { color: var(--text); }
+.main { max-width:1180px; margin:0 auto; padding:1.25rem 1.5rem; }
+#stats { font-size:.78rem; color:var(--muted); margin-bottom:1rem; }
+#stats b { color:var(--text); }
 
-/* ── MASONRY — no holes possible ── */
-.masonry { columns: 3 290px; column-gap: 1rem; }
+/* ── GRID — flex masonry, no CSS columns (fixes Safari column-gap issues) ── */
+.grid-wrap { display:flex; gap:1rem; align-items:flex-start; }
+.grid-col { flex:1; display:flex; flex-direction:column; gap:1rem; min-width:0; }
 
 /* ── CARD ── */
-.card {
-  display: block; text-decoration: none; color: inherit;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; padding: 1rem 1.1rem;
-  break-inside: avoid; margin-bottom: 1rem;
-  transition: transform .13s, box-shadow .13s;
-  -webkit-tap-highlight-color: transparent;
-}
-.card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+.card { display:block; text-decoration:none; color:inherit; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1rem 1.1rem; transition:transform .13s,box-shadow .13s; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.card:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.08); }
+.cmeta { display:flex; align-items:center; justify-content:space-between; margin-bottom:.45rem; }
+.csrc { font-size:.63rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+.lvl { font-size:.63rem; font-weight:600; padding:2px 7px; border-radius:100px; }
+.lvl-a2 { background:var(--a2); color:var(--a2t); } .lvl-b1 { background:var(--b1); color:var(--b1t); } .lvl-b2 { background:var(--b2); color:var(--b2t); }
+.ctitle { font-family:'Playfair Display',serif; font-size:.97rem; line-height:1.42; color:var(--text); margin-bottom:.4rem; }
+.cdesc { font-size:.79rem; color:var(--muted); line-height:1.62; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:.55rem; }
+.cfoot { display:flex; align-items:center; justify-content:space-between; padding-top:.5rem; border-top:1px solid var(--border); }
+.cdate { font-size:.68rem; color:var(--muted); }
+.ctopic { font-size:.63rem; font-weight:600; padding:2px 7px; border-radius:4px; background:var(--accent2); color:var(--accent); text-transform:capitalize; }
 
-.cmeta  { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
-.csrc   { font-size: .63rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
-.lvl    { font-size: .63rem; font-weight: 600; padding: 2px 7px; border-radius: 100px; }
-.lvl-a2 { background: var(--a2); color: var(--a2t); }
-.lvl-b1 { background: var(--b1); color: var(--b1t); }
-.lvl-b2 { background: var(--b2); color: var(--b2t); }
+/* ── STATE ── */
+.state { padding:4rem 1rem; text-align:center; color:var(--muted); }
+.state h3 { font-family:'Playfair Display',serif; color:var(--text); margin-bottom:.4rem; font-size:1.1rem; }
+.state p { font-size:.82rem; line-height:1.7; max-width:360px; margin:0 auto; }
+.spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .75s linear infinite; margin:0 auto 1rem; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.retry { margin-top:1rem; padding:7px 18px; background:var(--accent); color:#fff; border:none; border-radius:8px; font-family:'Inter',sans-serif; font-size:.82rem; font-weight:500; cursor:pointer; }
 
-.ctitle {
-  font-family: 'Playfair Display', serif;
-  font-size: .97rem; line-height: 1.42; color: var(--text);
-  margin-bottom: .45rem;
+/* ════════════════════════════════════════════
+   LEVEL 2 — READER MODE
+   ════════════════════════════════════════════ */
+.reader-overlay {
+  display:none; position:fixed; inset:0; z-index:50;
+  background:rgba(28,25,23,.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+  overflow-y:auto; padding:2rem 1rem;
+  animation:fadein .2s ease;
 }
-.cdesc {
-  font-size: .79rem; color: var(--muted); line-height: 1.62;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-  overflow: hidden; margin-bottom: .6rem;
+.reader-overlay.open { display:flex; align-items:flex-start; justify-content:center; }
+@keyframes fadein { from{opacity:0} to{opacity:1} }
+
+.reader-box {
+  background:var(--surface); border-radius:16px; width:100%; max-width:680px;
+  padding:2rem 2.25rem 2.5rem; position:relative;
+  animation:slidein .2s ease;
 }
-.cfoot {
-  display: flex; align-items: center; justify-content: space-between;
-  padding-top: .55rem; border-top: 1px solid var(--border);
+@keyframes slidein { from{transform:translateY(12px);opacity:0} to{transform:none;opacity:1} }
+
+.reader-close {
+  position:absolute; top:1rem; right:1rem;
+  background:var(--bg); border:1px solid var(--border); border-radius:100px;
+  padding:4px 12px; font-family:'Inter',sans-serif; font-size:.75rem; color:var(--muted);
+  cursor:pointer; transition:all .12s;
 }
-.cdate  { font-size: .68rem; color: var(--muted); }
-.ctopic {
-  font-size: .63rem; font-weight: 600; padding: 2px 7px; border-radius: 4px;
-  background: var(--accent2); color: var(--accent); text-transform: capitalize;
+.reader-close:hover { border-color:var(--accent); color:var(--accent); }
+
+.reader-meta { display:flex; align-items:center; gap:.5rem; margin-bottom:1rem; flex-wrap:wrap; }
+.reader-title { font-family:'Playfair Display',serif; font-size:1.5rem; line-height:1.35; margin-bottom:.75rem; }
+.reader-desc { font-size:.95rem; line-height:1.75; color:var(--muted); margin-bottom:1.25rem; }
+
+.reader-hint {
+  font-size:.75rem; color:var(--muted); margin-bottom:1.25rem;
+  padding:.5rem .75rem; background:var(--accent2); border-radius:8px; display:inline-block;
 }
 
-/* ── STATES ── */
-.state { padding: 4rem 1rem; text-align: center; color: var(--muted); }
-.state h3 { font-family: 'Playfair Display', serif; color: var(--text); margin-bottom: .4rem; font-size: 1.1rem; }
-.state p  { font-size: .82rem; line-height: 1.7; max-width: 360px; margin: 0 auto; }
-.spinner  {
-  width: 32px; height: 32px; border: 3px solid var(--border);
-  border-top-color: var(--accent); border-radius: 50%;
-  animation: spin .75s linear infinite; margin: 0 auto 1rem;
+.reader-text { font-size:.95rem; line-height:1.8; color:var(--text); }
+.reader-text .word {
+  cursor:pointer; border-radius:3px; transition:background .1s;
+  display:inline; padding:0 1px;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
-.retry {
-  margin-top: 1rem; padding: 7px 18px;
-  background: var(--accent); color: #fff; border: none; border-radius: 8px;
-  font-family: 'Inter', sans-serif; font-size: .82rem; font-weight: 500; cursor: pointer;
+.reader-text .word:hover { background:var(--b1); }
+.reader-text .word.hard { border-bottom:1px dashed var(--b2t); }
+
+.reader-link {
+  display:inline-flex; align-items:center; gap:.4rem; margin-top:1.5rem;
+  padding:.55rem 1.1rem; background:var(--accent); color:#fff; border-radius:8px;
+  text-decoration:none; font-size:.82rem; font-weight:500; transition:opacity .13s;
 }
-.retry:hover { opacity: .85; }
+.reader-link:hover { opacity:.85; }
+
+/* ── WORD POPUP ── */
+.wpop {
+  position:fixed; z-index:60; background:var(--surface);
+  border:1px solid var(--border); border-radius:12px;
+  padding:.75rem 1rem; max-width:260px; box-shadow:0 8px 24px rgba(0,0,0,.12);
+  pointer-events:none; opacity:0; transition:opacity .15s;
+}
+.wpop.show { opacity:1; pointer-events:auto; }
+.wpop-word { font-family:'Playfair Display',serif; font-size:1.1rem; margin-bottom:.2rem; }
+.wpop-phonetic { font-size:.75rem; color:var(--muted); margin-bottom:.4rem; }
+.wpop-def { font-size:.8rem; line-height:1.55; }
+.wpop-pos { font-size:.68rem; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:.04em; margin-bottom:.15rem; }
+.wpop-loading { font-size:.8rem; color:var(--muted); }
+.wpop-close { position:absolute; top:.4rem; right:.6rem; font-size:.9rem; color:var(--muted); cursor:pointer; background:none; border:none; padding:2px; }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 640px) {
-  :root { --filter-h: 44px; }
-  header { padding: 0 1rem; }
-  .filter-inner { padding: 0 1rem; }
-  .fg-search { display: none; }
-  .search-mobile { display: block; }
-  .main { padding: 1rem; }
-  .masonry { columns: 1; }
+@media (max-width:640px) {
+  :root { --fh:44px; }
+  header { padding:0 1rem; }
+  .finner { padding:0 1rem; }
+  .fg-search { display:none; }
+  .smob { display:block; }
+  .main { padding:1rem; }
+  .grid-wrap { flex-direction:column; }
+  .reader-box { padding:1.25rem 1.25rem 1.75rem; }
+  .reader-title { font-size:1.2rem; }
 }
-@media (min-width: 641px) and (max-width: 960px) {
-  .fg-search { display: none; }
-  .masonry { columns: 2 280px; }
+@media (min-width:641px) and (max-width:960px) {
+  .fg-search { display:none; }
 }
-@media (min-width: 961px) {
-  .fg-search { display: flex; }
-}
+@media (min-width:961px) { .fg-search { display:flex; } }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">News<span>learn</span></div>
+  <div class="logo" onclick="closeReader()">News<span>learn</span></div>
   <span id="updated"></span>
 </header>
 
-<div class="filter-bar">
-  <div class="filter-inner">
+<div class="fbar">
+  <div class="finner">
     <div class="fg">
       <span class="flabel">Level</span>
       <button class="pill active" data-f="level" data-v="all">All</button>
@@ -217,16 +194,16 @@ header {
     </div>
     <div class="fg fg-search">
       <div class="swrap">
-        <svg class="sicon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#78716c" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <svg class="sico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#78716c" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <input class="sinput" id="sd" type="search" placeholder="Search…" autocomplete="off">
       </div>
     </div>
   </div>
 </div>
 
-<div class="search-mobile">
+<div class="smob">
   <div class="swrap">
-    <svg class="sicon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#78716c" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <svg class="sico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#78716c" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input class="sinput" id="sm" type="search" placeholder="Search articles…" autocomplete="off">
   </div>
 </div>
@@ -236,30 +213,80 @@ header {
   <div id="root"><div class="state"><div class="spinner"></div><h3>Loading…</h3></div></div>
 </div>
 
+<!-- READER OVERLAY -->
+<div class="reader-overlay" id="reader" onclick="handleOverlayClick(event)">
+  <div class="reader-box" id="reader-box">
+    <button class="reader-close" onclick="closeReader()">✕ Close</button>
+    <div id="reader-content"></div>
+  </div>
+</div>
+
+<!-- WORD POPUP -->
+<div class="wpop" id="wpop">
+  <button class="wpop-close" onclick="closePopup()">✕</button>
+  <div id="wpop-inner"></div>
+</div>
+
 <script>
 // ── State ─────────────────────────────────────────────────────────────────────
-let ALL = [];
-let F = { level:'all', topic:'all', source:'all' };
-let Q = '';
+let ALL = [], F = {level:'all',topic:'all',source:'all'}, Q = '';
+let dictCache = {};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-
 function fmtDate(s) {
   if (!s) return '';
   const d = new Date(s);
-  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
 }
-
-// Second-pass junk filter on the client side
 function isJunk(a) {
   if (!a.title || a.title.length < 20) return true;
   if (!a.url || !a.url.startsWith('http')) return true;
-  // Has no content at all
-  if (!a.desc && !a.title) return true;
-  // Looks like a fragment (no verb-like structure, fewer than 4 words)
   if (a.title.trim().split(/\s+/).length < 4) return true;
   return false;
+}
+
+// ── Grid layout (JS masonry for pixel-perfect columns) ────────────────────────
+function getColCount() {
+  const w = window.innerWidth;
+  if (w < 641) return 1;
+  if (w < 961) return 2;
+  return 3;
+}
+
+function renderGrid(list) {
+  const n = getColCount();
+  const cols = Array.from({length:n}, () => []);
+  const heights = Array(n).fill(0);
+
+  // Distribute cards into shortest column (true masonry)
+  list.forEach(a => {
+    const shortest = heights.indexOf(Math.min(...heights));
+    cols[shortest].push(a);
+    // Estimate height: title ~60px + desc ~60px + footer ~40px = ~160px base
+    heights[shortest] += 160 + (a.title.length > 80 ? 30 : 0) + (a.desc ? 50 : 0);
+  });
+
+  const colsHtml = cols.map(col =>
+    `<div class="grid-col">${col.map(cardHtml).join('')}</div>`
+  ).join('');
+
+  return `<div class="grid-wrap">${colsHtml}</div>`;
+}
+
+function cardHtml(a) {
+  return `<div class="card" onclick="openReader(${JSON.stringify(esc(JSON.stringify(a)))})">
+    <div class="cmeta">
+      <span class="csrc">${esc(a.source)}</span>
+      <span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span>
+    </div>
+    <div class="ctitle">${esc(a.title)}</div>
+    ${a.desc ? `<div class="cdesc">${esc(a.desc)}</div>` : ''}
+    <div class="cfoot">
+      <span class="cdate">${fmtDate(a.date)}</span>
+      <span class="ctopic">${esc(a.topic)}</span>
+    </div>
+  </div>`;
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
@@ -279,53 +306,132 @@ function filtered() {
 
 function render() {
   const list = filtered();
-  const root = document.getElementById('root');
-
-  document.getElementById('stats').innerHTML = list.length === ALL.filter(a=>!isJunk(a)).length
+  const clean = ALL.filter(a => !isJunk(a));
+  document.getElementById('stats').innerHTML = list.length === clean.length
     ? `<b>${list.length}</b> articles`
-    : `<b>${list.length}</b> of <b>${ALL.filter(a=>!isJunk(a)).length}</b> articles`;
+    : `<b>${list.length}</b> of <b>${clean.length}</b> articles`;
 
   if (!list.length) {
-    root.innerHTML = `<div class="state"><h3>No results</h3><p>Try different filters or clear the search.</p></div>`;
+    document.getElementById('root').innerHTML = `<div class="state"><h3>No results</h3><p>Try different filters or clear the search.</p></div>`;
     return;
   }
-
-  root.innerHTML = '<div class="masonry">' + list.map(a => `
-    <a class="card" href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">
-      <div class="cmeta">
-        <span class="csrc">${esc(a.source)}</span>
-        <span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span>
-      </div>
-      <div class="ctitle">${esc(a.title)}</div>
-      ${a.desc ? `<div class="cdesc">${esc(a.desc)}</div>` : ''}
-      <div class="cfoot">
-        <span class="cdate">${fmtDate(a.date)}</span>
-        <span class="ctopic">${esc(a.topic)}</span>
-      </div>
-    </a>`).join('') + '</div>';
+  document.getElementById('root').innerHTML = renderGrid(list);
 }
 
 // ── Load ──────────────────────────────────────────────────────────────────────
 async function loadAll() {
   document.getElementById('stats').textContent = '';
-  document.getElementById('root').innerHTML =
-    '<div class="state"><div class="spinner"></div><h3>Loading articles…</h3><p>Fetching from BBC, Guardian, The Verge, NY Times and Ars Technica.</p></div>';
+  document.getElementById('root').innerHTML = '<div class="state"><div class="spinner"></div><h3>Loading articles…</h3><p>Fetching from BBC, Guardian, The Verge, NY Times and Ars Technica.</p></div>';
   try {
     const res  = await fetch('/api/news');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (!data.ok) throw new Error('API error');
     ALL = data.articles || [];
-    document.getElementById('updated').textContent =
-      'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     render();
   } catch(e) {
-    document.getElementById('root').innerHTML =
-      `<div class="state"><h3>Could not load articles</h3>
-       <p>Make sure this is deployed on Vercel, not opened as a local file.<br><small style="opacity:.6">${e.message}</small></p>
-       <button class="retry" onclick="loadAll()">Try again</button></div>`;
+    document.getElementById('root').innerHTML = `<div class="state"><h3>Could not load</h3><p>Make sure this is deployed on Vercel.<br><small style="opacity:.5">${e.message}</small></p><button class="retry" onclick="loadAll()">Try again</button></div>`;
   }
 }
+
+// ── READER MODE ───────────────────────────────────────────────────────────────
+function openReader(jsonStr) {
+  const a = JSON.parse(jsonStr);
+  const words = (a.desc || a.title || '').split(/(\s+)/).map(token => {
+    const clean = token.replace(/[^a-zA-Z]/g,'');
+    if (!clean || token.match(/^\s+$/)) return token;
+    return `<span class="word" data-word="${clean.toLowerCase()}" onclick="lookupWord(event,'${clean.toLowerCase()}')">${token}</span>`;
+  }).join('');
+
+  document.getElementById('reader-content').innerHTML = `
+    <div class="reader-meta">
+      <span class="csrc">${esc(a.source)}</span>
+      <span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span>
+      <span class="cdate" style="margin-left:auto">${fmtDate(a.date)}</span>
+    </div>
+    <div class="reader-title">${esc(a.title)}</div>
+    <div class="reader-hint">💡 Tap any word to see its meaning</div>
+    <div class="reader-text">${words}</div>
+    <br>
+    <a class="reader-link" href="${esc(a.url)}" target="_blank" rel="noopener">
+      Read full article →
+    </a>`;
+
+  document.getElementById('reader').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReader() {
+  document.getElementById('reader').classList.remove('open');
+  document.body.style.overflow = '';
+  closePopup();
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('reader')) closeReader();
+}
+
+// ── WORD LOOKUP ───────────────────────────────────────────────────────────────
+let popupWord = null;
+
+async function lookupWord(e, word) {
+  e.stopPropagation();
+  if (popupWord === word) { closePopup(); return; }
+  popupWord = word;
+
+  const pop = document.getElementById('wpop');
+  const inner = document.getElementById('wpop-inner');
+
+  // Position popup near click
+  const x = Math.min(e.clientX, window.innerWidth - 280);
+  const y = e.clientY + 16;
+  pop.style.left = x + 'px';
+  pop.style.top  = y + 'px';
+  inner.innerHTML = `<div class="wpop-loading">Looking up <b>${word}</b>…</div>`;
+  pop.classList.add('show');
+
+  // Cache hit
+  if (dictCache[word]) { renderPopup(word, dictCache[word]); return; }
+
+  try {
+    const res  = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+    if (!res.ok) throw new Error('not found');
+    const data = await res.json();
+    dictCache[word] = data[0];
+    renderPopup(word, data[0]);
+  } catch {
+    inner.innerHTML = `<div class="wpop-word">${word}</div><div class="wpop-def" style="color:var(--muted)">No definition found.</div>`;
+  }
+}
+
+function renderPopup(word, entry) {
+  const phonetic = entry.phonetics?.find(p => p.text)?.text || '';
+  const meanings = (entry.meanings || []).slice(0,2);
+  let html = `<div class="wpop-word">${word}</div>`;
+  if (phonetic) html += `<div class="wpop-phonetic">${phonetic}</div>`;
+  meanings.forEach(m => {
+    const def = m.definitions?.[0]?.definition || '';
+    if (def) html += `<div class="wpop-pos">${m.partOfSpeech}</div><div class="wpop-def">${def}</div>`;
+  });
+  document.getElementById('wpop-inner').innerHTML = html;
+}
+
+function closePopup() {
+  popupWord = null;
+  document.getElementById('wpop').classList.remove('show');
+}
+
+// Close popup on outside click
+document.addEventListener('click', e => {
+  const pop = document.getElementById('wpop');
+  if (pop.classList.contains('show') && !pop.contains(e.target) && !e.target.classList.contains('word')) {
+    closePopup();
+  }
+});
+
+// ESC to close reader
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReader(); });
 
 // ── Filters ───────────────────────────────────────────────────────────────────
 document.querySelectorAll('.pill').forEach(btn => {
@@ -336,14 +442,13 @@ document.querySelectorAll('.pill').forEach(btn => {
     render();
   });
 });
-
-function onSearch(val) {
-  Q = val.trim();
-  render();
-}
-
+function onSearch(v) { Q = v.trim(); render(); }
 document.getElementById('sd').addEventListener('input', e => { document.getElementById('sm').value = e.target.value; onSearch(e.target.value); });
 document.getElementById('sm').addEventListener('input', e => { document.getElementById('sd').value = e.target.value; onSearch(e.target.value); });
+
+// Re-render grid on resize (column count may change)
+let resizeTimer;
+window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadAll();

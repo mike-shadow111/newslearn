@@ -34,29 +34,26 @@ function stripHtml(s) {
   return (s || '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<\/p>/gi, ' ')
+    .replace(/<\/li>/gi, ' ')
+    .replace(/<[^>]+>/g, '')
     .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
-    .replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g, '')
+    .replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#\d+;/g,'')
     .replace(/&[a-z]+;/g,' ')
     .replace(/\s+/g,' ').trim();
 }
 
 function cleanDesc(raw) {
   let s = stripHtml(raw);
-  // Remove newsletter/promo sentences
   s = s.replace(/\b(Get our|Sign up (for|to)|Subscribe (to|for)|Click here|Read more|More from|Follow us)[^.!?]*[.!?]/gi, '');
-  // Remove lone URLs
   s = s.replace(/https?:\/\/\S+/g, '');
-  // Remove "X Jun", "6 Jun Health" type date/tag fragments at start
-  s = s.replace(/^\d{1,2}\s+\w+\s*/,'');
-  s = s.replace(/\s+/g,' ').trim();
-  return s.slice(0, 300);
+  s = s.replace(/^\d{1,2}\s+\w+\s*/, '');
+  return s.replace(/\s+/g,' ').trim().slice(0, 300);
 }
 
 function extractItems(xml) {
-  // Strip <image> blocks first so their <title> doesn't bleed into item parsing
   xml = xml.replace(/<image[\s\S]*?<\/image>/gi, '');
-  // Also strip <textInput> blocks
   xml = xml.replace(/<textInput[\s\S]*?<\/textInput>/gi, '');
   return xml.match(/<item[\s\S]*?<\/item>/g)
       || xml.match(/<entry[\s\S]*?<\/entry>/g)
@@ -66,7 +63,6 @@ function extractItems(xml) {
 function parseXml(xml, source) {
   const items = [];
   const blocks = extractItems(xml);
-
   for (const block of blocks.slice(0, 30)) {
     const get = tag => {
       const m = block.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`, 'i'))
@@ -83,13 +79,12 @@ function parseXml(xml, source) {
     const desc  = cleanDesc(get('description') || get('summary') || get('content'));
     const date  = get('pubDate') || get('published') || get('updated') || '';
 
-    // ── Hard filters ──
-    if (!title || title.length < 20) continue;           // too short = not a headline
-    if (!link || !link.startsWith('http')) continue;     // no valid URL
+    if (!title || title.length < 20) continue;
+    if (!link || !link.startsWith('http')) continue;
     if (/^(get our|sign up|subscribe|live$|breaking news|more from|follow us)/i.test(title)) continue;
-    if (!/^[A-Z"'«\d([]/.test(title)) continue;         // must start with capital/quote/number
-    if (title.split(' ').length < 4) continue;           // less than 4 words = not a headline
-    if (/^https?:\/\//.test(title)) continue;            // title is a URL
+    if (!/^[A-Z"'«\d([]/.test(title)) continue;
+    if (title.split(' ').length < 4) continue;
+    if (/^https?:\/\//.test(title)) continue;
 
     items.push({ title, desc, url: link, date, source });
   }
@@ -130,11 +125,31 @@ function estimateLevel(text) {
 
 function guessTopic(t, d) {
   const s = ((t||'')+(d||'')).toLowerCase();
-  if (/\b(ai|tech|software|apple|google|microsoft|robot|cyber|chip|iphone|android|startup|openai|nvidia|meta|app\b)\b/.test(s)) return 'technology';
+  if (/\b(ai|tech|software|apple|google|microsoft|robot|cyber|chip|iphone|android|startup|openai|nvidia|meta)\b/.test(s)) return 'technology';
   if (/\b(space|nasa|climate|planet|science|biolog|physics|chemist|asteroid|quantum|genome|species|fossil)\b/.test(s)) return 'science';
   if (/\b(health|cancer|virus|hospital|doctor|mental|fitness|obesity|drug|vaccine|disease|treatment|covid|ebola|outbreak)\b/.test(s)) return 'health';
   if (/\b(market|economy|stock|inflation|bank|trade|invest|gdp|recession|revenue|profit|crypto|bitcoin|tariff)\b/.test(s)) return 'business';
   return 'world';
+}
+
+// Key phrase similarity for deduplication (handles "Putin says" vs "Putin rejects" same story)
+function titleKey(title) {
+  const stopwords = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','as','is','are','was','were','has','have','had','his','her','its','their','he','she','it','they','that','this','says','said','over','after','from','into','about','be','will','who','what','how','when','up','out','off','not','no']);
+  return title.toLowerCase()
+    .replace(/[^a-z0-9\s]/g,'')
+    .split(/\s+/)
+    .filter(w => w.length > 2 && !stopwords.has(w))
+    .slice(0, 6)
+    .sort()
+    .join('|');
+}
+
+function wordOverlap(a, b) {
+  const ka = new Set(a.split('|'));
+  const kb = new Set(b.split('|'));
+  let common = 0;
+  ka.forEach(w => { if (kb.has(w)) common++; });
+  return common / Math.min(ka.size, kb.size);
 }
 
 module.exports = async (req, res) => {
@@ -143,10 +158,8 @@ module.exports = async (req, res) => {
 
   const results = await Promise.allSettled(
     FEEDS.map(async feed => {
-      try {
-        const xml = await fetchUrl(feed.url);
-        return parseXml(xml, feed.source);
-      } catch { return []; }
+      try { return parseXml(await fetchUrl(feed.url), feed.source); }
+      catch { return []; }
     })
   );
 
@@ -157,17 +170,21 @@ module.exports = async (req, res) => {
       ...a,
       level: estimateLevel(a.title + ' ' + a.desc),
       topic: guessTopic(a.title, a.desc),
+      _key: titleKey(a.title),
     }));
-
-  // Deduplicate
-  const seen = new Set();
-  articles = articles.filter(a => {
-    const key = a.title.slice(0, 60).toLowerCase().replace(/[^a-z0-9]/g,'');
-    if (seen.has(key)) return false;
-    seen.add(key); return true;
-  });
 
   articles.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  res.status(200).json({ ok: true, count: articles.length, articles });
+  // Deduplicate: exact title + near-duplicate story (>60% keyword overlap, same level)
+  const kept = [];
+  for (const a of articles) {
+    const isDup = kept.some(k =>
+      k._key === a._key ||
+      (k.level === a.level && wordOverlap(k._key, a._key) > 0.6)
+    );
+    if (!isDup) kept.push(a);
+  }
+
+  const clean = kept.map(({ _key, ...rest }) => rest);
+  res.status(200).json({ ok: true, count: clean.length, articles: clean });
 };
