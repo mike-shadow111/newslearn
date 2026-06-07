@@ -74,8 +74,11 @@ function extractArticle(html, url) {
       .replace(/&[a-z]+;/g,' ').replace(/\s+/g,' ').trim();
 
     if (!text || text.length < 20) continue;
-    // Skip nav/promo text
-    if (/^(sign up|subscribe|get our|read more|advertisement|related:|more from|follow us)/i.test(text)) continue;
+    // Skip nav/promo/related text
+    if (/^(sign up|subscribe|get our|read more|advertisement|related[: ]|more from|follow us|share this|save story|add to|copyright|all rights|terms of use|privacy policy|cookie|topics:|section:|tags:|topics covered)/i.test(text)) continue;
+    if (/^(share|save|bookmark|print|listen|watch|video|audio|photo|gallery|slideshow)/i.test(text)) continue;
+    // Skip very short "sentences" that are bylines/captions
+    if (text.length < 30 && b.tag === 'p') continue;
 
     blocks.push({ tag, text });
   }
