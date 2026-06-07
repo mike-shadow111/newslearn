@@ -53,15 +53,14 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 #stats b { color:var(--text); }
 
 /* MASONRY — pure CSS, most reliable */
-.masonry { column-count:3; column-gap:1rem; }
+.masonry { display:flex; gap:1rem; align-items:flex-start; }
+.masonry-col { flex:1; min-width:0; display:flex; flex-direction:column; gap:1rem; }
 .card {
-  display:block; break-inside:avoid; -webkit-column-break-inside:avoid;
+  display:block;
   background:var(--surface); border:1px solid var(--border); border-radius:12px;
-  padding:1rem 1.1rem; margin-bottom:1rem;
+  padding:1rem 1.1rem;
   cursor:pointer; transition:transform .13s,box-shadow .13s;
   -webkit-tap-highlight-color:transparent;
-  /* BFC prevents column bleed */
-  display:inline-block; width:100%;
 }
 .card:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.08); }
 .cmeta { display:flex; align-items:center; justify-content:space-between; margin-bottom:.45rem; }
@@ -135,7 +134,7 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
   :root{--fh:44px;}
   header,.finner{padding-left:1rem;padding-right:1rem;}
   .main{padding:1rem;}
-  .masonry{column-count:1;}
+  /* masonry handled by flex-direction above */
   .sinput{width:120px;}
   .sinput:focus{width:155px;}
   .r-header{padding:0 1rem;}
@@ -143,7 +142,8 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
   .r-title{font-size:1.4rem;}
   .r-article p{font-size:1rem;}
 }
-@media(min-width:641px) and (max-width:960px){.masonry{column-count:2;}}
+@media(max-width:640px){.masonry{flex-direction:column;}}
+@media(min-width:641px) and (max-width:960px){.masonry-col:nth-child(3){display:none;}}
 </style>
 </head>
 <body>
@@ -274,18 +274,25 @@ function render(){
     return;
   }
 
+  const n = window.innerWidth < 641 ? 1 : window.innerWidth < 961 ? 2 : 3;
+  const cols = Array.from({length:n}, () => []);
+  list.forEach((a,i) => cols[i % n].push(a));
+
+  function cardHtml(a) {
+    const idx = ARTICLES.indexOf(a);
+    const desc = clean(a.desc||'');
+    return `<div class="card" data-idx="${idx}">
+      <div class="cmeta"><span class="csrc">${h(a.source)}</span><span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span></div>
+      <div class="ctitle">${h(clean(a.title))}</div>
+      ${desc ? `<div class="cdesc">${h(desc)}</div>` : ''}
+      <div class="cfoot"><span class="cdate">${fmtDate(a.date)}</span><span class="ctopic">${h(a.topic)}</span></div>
+    </div>`;
+  }
+
   document.getElementById('root').innerHTML =
     '<div class="masonry">' +
-    list.map(a => {
-      const idx = ARTICLES.indexOf(a);
-      const desc = clean(a.desc||'');
-      return `<div class="card" data-idx="${idx}">
-        <div class="cmeta"><span class="csrc">${h(a.source)}</span><span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span></div>
-        <div class="ctitle">${h(clean(a.title))}</div>
-        ${desc ? `<div class="cdesc">${h(desc)}</div>` : ''}
-        <div class="cfoot"><span class="cdate">${fmtDate(a.date)}</span><span class="ctopic">${h(a.topic)}</span></div>
-      </div>`;
-    }).join('') + '</div>';
+    cols.map(col => `<div class="masonry-col">${col.map(cardHtml).join('')}</div>`).join('') +
+    '</div>';
 
   document.querySelectorAll('.card[data-idx]').forEach(el => {
     el.addEventListener('click', () => openReader(parseInt(el.dataset.idx)));
@@ -432,25 +439,20 @@ async function translate(e, word){
   if (DICT[word]){ showTranslation(word, DICT[word]); return; }
 
   try {
-    // MyMemory — free translation API, no key needed
-    const res  = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|ru`);
+    const res  = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|ru&de=newslearn@mail.com`);
+    if (!res.ok) throw new Error('fetch failed');
     const data = await res.json();
     const tr   = data.responseData?.translatedText;
-    if (!tr || tr.toLowerCase()===word.toLowerCase()) throw new Error('no translation');
-    DICT[word] = { word, translation: tr };
+    // MyMemory returns uppercase for single words — lowercase it
+    const trClean = tr ? tr.toLowerCase().trim() : '';
+    // Only reject if it's identical to the English word (no translation found)
+    if (!trClean || trClean === word.toLowerCase()) throw new Error('no translation');
+    // Capitalize first letter
+    const trFinal = trClean.charAt(0).toUpperCase() + trClean.slice(1);
+    DICT[word] = { word, translation: trFinal };
     showTranslation(word, DICT[word]);
-  } catch {
-    // Fallback: dictionary API for phonetics + manual note
-    try {
-      const res  = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-      const data = await res.json();
-      const phon = data[0]?.phonetics?.find(p=>p.text)?.text||'';
-      const def  = data[0]?.meanings?.[0]?.definitions?.[0]?.definition||'';
-      DICT[word] = { word, phonetic: phon, fallbackDef: def };
-      showTranslation(word, DICT[word]);
-    } catch {
-      body.innerHTML = `<div class="wword">${word}</div><div class="wloading" style="color:var(--muted)">Перевод не найден</div>`;
-    }
+  } catch(err) {
+    body.innerHTML = `<div class="wword">${word}</div><div class="wloading" style="color:var(--muted)">Перевод не найден</div>`;
   }
 }
 
@@ -488,6 +490,7 @@ document.getElementById('search').addEventListener('input', e => { Q=e.target.va
 
 loadAll();
 setInterval(loadAll, 15*60*1000);
+let _rt; window.addEventListener('resize', () => { clearTimeout(_rt); _rt = setTimeout(render, 200); });
 </script>
 </body>
 </html>

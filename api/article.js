@@ -54,20 +54,25 @@ function stripHtml(s) {
 // Junk patterns to skip
 const JUNK = [
   /^(sign up|subscribe|get our|click here|read more|more from|follow us)/i,
-  /^(share this|save story|bookmark|print this|listen to)/i,
-  /^(advertisement|sponsored|promoted)/i,
-  /^(related:|also read|see also|you may also)/i,
-  /^(copyright|all rights reserved|terms of|privacy policy)/i,
-  /^(image:|photo:|caption:|credit:|picture:)/i,
-  /^(tags:|topics:|section:|filed under:)/i,
-  /newsletter|unsubscribe|opt.?out/i,
-  /^[^a-zA-Z]/,  // starts with non-letter (likely a caption/label)
+  /^(share this?|save story|bookmark|print this|listen to|watch|audio|video)/i,
+  /^(advertisement|sponsored|promoted|partner content)/i,
+  /^(related[: ]|also read|see also|you may also|more on this)/i,
+  /^(copyright|all rights reserved|terms of|privacy policy|cookie)/i,
+  /^(image[: ]|photo[: ]|caption[: ]|credit[: ]|picture[: ]|illustration[: ])/i,
+  /^(tags[: ]|topics[: ]|section[: ]|filed under[: ]|keywords[: ])/i,
+  /^(by |written by |reported by )/i,
+  /newsletter|unsubscribe|opt.?out|manage preferences/i,
+  /this article (was|is) (originally )?published/i,
+  /comments? \d+|leave a comment|join the discussion/i,
+  /^\s*\d+\s*$/,  // just a number (page number, ad counter)
+  /^[^a-zA-Z"'(]/,  // starts with non-letter
 ];
 
 function isJunkBlock(text, tag) {
-  if (!text || text.length < 25) return true;
-  // Captions are usually short italic/figcaption
+  if (!text || text.length < 30) return true;
   if (tag === 'figcaption') return true;
+  // Ars Technica / Guardian put bylines in <p> — skip short ones that look like names
+  if (tag === 'p' && text.length < 60 && /^[A-Z][a-z]+ [A-Z][a-z]+/.test(text)) return true;
   for (const re of JUNK) {
     if (re.test(text)) return true;
   }
@@ -83,8 +88,14 @@ function extractArticle(html) {
     .replace(/<header[\s\S]*?<\/header>/gi,'')
     .replace(/<footer[\s\S]*?<\/footer>/gi,'')
     .replace(/<aside[\s\S]*?<\/aside>/gi,'')
-    .replace(/<figure[\s\S]*?<\/figure>/gi,'') // removes image captions
+    .replace(/<figure[\s\S]*?<\/figure>/gi,'')
+    .replace(/<figcaption[\s\S]*?<\/figcaption>/gi,'')
     .replace(/<picture[\s\S]*?<\/picture>/gi,'')
+    .replace(/<img[^>]*>/gi,'')
+    .replace(/<iframe[\s\S]*?<\/iframe>/gi,'')
+    .replace(/<form[\s\S]*?<\/form>/gi,'')
+    .replace(/<button[\s\S]*?<\/button>/gi,'')
+    .replace(/<div[^>]*class="[^"]*(?:related|promo|newsletter|subscribe|signup|share|social|comments?|tags?|byline|author-bio|advertisement|ad-)[^"]*"[^>]*>[\s\S]*?<\/div>/gi,'')
     .replace(/<!--[\s\S]*?-->/g,'');
 
   // Try known article containers
