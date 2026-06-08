@@ -921,13 +921,17 @@ async function lookupWord(e, word, phrase) {
   if (DICT[key]) { showTranslation(key, DICT[key]); return; }
 
   try {
-    const res = await fetch('/api/translate?q=' + encodeURIComponent(key));
+    const res = await fetch(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${encodeURIComponent(key)}`
+    );
     const data = await res.json();
-    if (!data.ok || !data.translation) throw new Error('no translation');
-    DICT[key] = { word: key, translation: data.translation };
+    // Google returns nested arrays: [[["перевод","original",...],...],...]
+    const tr = data?.[0]?.map(x => x?.[0]).filter(Boolean).join('');
+    if (!tr || tr.toLowerCase() === key.toLowerCase()) throw new Error('no translation');
+    DICT[key] = { word: key, translation: tr };
     showTranslation(key, DICT[key]);
   } catch {
-    body.innerHTML = `<div class="wword">${h(key)}</div><div class="wphon" style="color:var(--muted)">Translation not found</div>`;
+    body.innerHTML = `<div class="wword">${h(key)}</div><div class="wphon" style="color:var(--muted)">Перевод не найден</div>`;
   }
 }
 
