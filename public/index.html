@@ -851,6 +851,17 @@ function attachWordHandlers() {
   document.querySelectorAll('#r-body .w').forEach(el => {
     el.addEventListener('click', e => { e.stopPropagation(); lookupWord(e, el.dataset.word); });
   });
+  // Selection of phrases
+  document.getElementById('r-body').addEventListener('mouseup', e => {
+    const sel = window.getSelection();
+    const phrase = sel ? sel.toString().trim() : '';
+    if (phrase.length > 2 && phrase.length < 100 && phrase.includes(' ')) {
+      const range = sel.getRangeAt(0);
+      const rect  = range.getBoundingClientRect();
+      const fakeE = { clientX: rect.left + rect.width/2, clientY: rect.bottom };
+      lookupWord(fakeE, phrase.split(' ')[0], phrase);
+    }
+  });
 }
 
 function closeReader() {
@@ -892,9 +903,10 @@ document.getElementById('overlay').addEventListener('click', e => {
 // ════════════════════════════════════════════
 // WORD TRANSLATION
 // ════════════════════════════════════════════
-async function lookupWord(e, word) {
-  if (popWord === word) { closePopup(); return; }
-  popWord = word;
+async function lookupWord(e, word, phrase) {
+  const key = phrase || word;
+  if (popWord === key) { closePopup(); return; }
+  popWord = key;
 
   const pop  = document.getElementById('wpop');
   const body = document.getElementById('wbody');
@@ -903,22 +915,19 @@ async function lookupWord(e, word) {
   const y = Math.min(e.clientY + 20, window.innerHeight - 200);
   pop.style.left = x + 'px';
   pop.style.top  = y + 'px';
-  body.innerHTML = `<div class="wword">${word}</div><div class="wphon" style="color:var(--muted)">Translating…</div>`;
+  body.innerHTML = `<div class="wword">${h(key)}</div><div class="wphon" style="color:var(--muted)">Translating…</div>`;
   pop.classList.add('show');
 
-  if (DICT[word]) { showTranslation(word, DICT[word]); return; }
+  if (DICT[key]) { showTranslation(key, DICT[key]); return; }
 
   try {
-    const res  = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|ru`);
+    const res = await fetch('/api/translate?q=' + encodeURIComponent(key));
     const data = await res.json();
-    const tr   = data.responseData?.translatedText;
-    const trClean = (tr||'').toLowerCase().trim();
-    if (!trClean || trClean === word.toLowerCase()) throw new Error('no translation');
-    const trFinal = trClean.charAt(0).toUpperCase() + trClean.slice(1);
-    DICT[word] = { word, translation: trFinal };
-    showTranslation(word, DICT[word]);
+    if (!data.ok || !data.translation) throw new Error('no translation');
+    DICT[key] = { word: key, translation: data.translation };
+    showTranslation(key, DICT[key]);
   } catch {
-    body.innerHTML = `<div class="wword">${word}</div><div class="wphon" style="color:var(--muted)">Translation not found</div>`;
+    body.innerHTML = `<div class="wword">${h(key)}</div><div class="wphon" style="color:var(--muted)">Translation not found</div>`;
   }
 }
 

@@ -121,17 +121,64 @@ module.exports = async (req, res) => {
     if (!body) return res.json({ ok: false, error: 'could not extract' });
 
     const blocks = [];
-    const re = /<(h[1-4]|p|blockquote)[^>]*>([\s\S]*?)<\/\1>/gi;
+    const re = /<(h[1-4]|p|blockquote)[^>]*>([\s\S]*?)<\/>/gi;
     let m;
     while ((m = re.exec(body)) !== null) {
       const tag  = m[1].toLowerCase();
       const text = stripHtml(m[2]);
       if (isJunk(text, tag)) continue;
-      if (text.length > 2000) continue; // skip concatenated blobs
+      if (text.length > 2000) continue;
       blocks.push({ tag, text });
     }
 
     if (blocks.length < 2) return res.json({ ok: false, error: 'too few blocks' });
+
+    // Clean with Groq if key available
+    const groqKey = process.env.GROQ_API_KEY;
+    if (groqKey) {
+      try {
+        const rawText = blocks.map(b => b.text).join('\n\n');
+        const groqRes = await new Promise((resolve, reject) => {
+          const body2 = JSON.stringify({
+            model: 'llama3-8b-8192',
+            messages: [{
+              role: 'user',
+              content: `Clean this article text: remove any subscription prompts, author bios, image captions, ads, or navigation text. Keep all real article content intact. Return only the cleaned paragraphs, one per line, no extra commentary.\n\n${rawText.slice(0, 6000)}`
+            }],
+            max_tokens: 2000,
+            temperature: 0
+          });
+          const req2 = https.request({
+            hostname: 'api.groq.com',
+            path: '/openai/v1/chat/completions',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${groqKey}`,
+              'Content-Length': Buffer.byteLength(body2)
+            }
+          }, r => {
+            let d = ''; r.on('data', c => d += c); r.on('end', () => resolve(d));
+          });
+          req2.on('error', reject);
+          req2.setTimeout(15000, () => { req2.destroy(); reject(new Error('groq timeout')); });
+          req2.write(body2); req2.end();
+        });
+        const parsed = JSON.parse(groqRes);
+        const cleaned = parsed.choices?.[0]?.message?.content;
+        if (cleaned && cleaned.length > 100) {
+          const cleanedBlocks = cleaned.split('\n\n')
+            .map(t => t.trim()).filter(t => t.length > 30)
+            .map(t => ({ tag: 'p', text: t }));
+          if (cleanedBlocks.length >= 2) {
+            return res.json({ ok: true, blocks: cleanedBlocks, cleaned: true });
+          }
+        }
+      } catch(groqErr) {
+        // Groq failed — fall through to unclean blocks
+      }
+    }
+
     res.json({ ok: true, blocks });
   } catch(e) {
     res.json({ ok: false, error: e.message });
