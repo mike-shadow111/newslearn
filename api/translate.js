@@ -46,9 +46,26 @@ module.exports = async (req, res) => {
       r.write(body); r.end();
     });
 
-    if (!translation) return res.json({ ok: false, error: 'empty' });
-    res.json({ ok: true, translation });
+    if (!translation) throw new Error('empty response');
+    res.json({ ok: true, translation, source: 'groq' });
   } catch(e) {
-    res.json({ ok: false, error: e.message });
+    // Fallback to MyMemory
+    try {
+      const fbRes = await new Promise((resolve, reject) => {
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=en|ru`;
+        https.get(url, r => {
+          let d = ''; r.on('data', c => d += c);
+          r.on('end', () => resolve(d));
+        }).on('error', reject).setTimeout(5000, function(){ this.destroy(); reject(new Error('timeout')); });
+      });
+      const fbData = JSON.parse(fbRes);
+      const tr = fbData.responseData?.translatedText;
+      const trClean = (tr||'').toLowerCase().trim();
+      if (!trClean || trClean === q.toLowerCase()) throw new Error('no translation');
+      const trFinal = trClean.charAt(0).toUpperCase() + trClean.slice(1);
+      res.json({ ok: true, translation: trFinal, source: 'mymemory' });
+    } catch(e2) {
+      res.json({ ok: false, error: e2.message });
+    }
   }
 };
