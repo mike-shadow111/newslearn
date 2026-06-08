@@ -3,162 +3,424 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Read real English news. Tap any word for Russian translation.">
 <title>Newslearn</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* ── RESET & VARS ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg:#f7f4ef; --surface:#fff; --border:#e8e2d9;
-  --text:#1c1917; --muted:#78716c; --subtle:#a8a29e;
-  --accent:#16653a; --accent2:#e8f0eb;
-  --a2:#dcfce7; --a2t:#166534;
-  --b1:#fef9c3; --b1t:#854d0e;
-  --b2:#fee2e2; --b2t:#991b1b;
-  --hh:56px; --fh:48px;
-  --serif:'Playfair Display',Georgia,serif;
-  --sans:'Inter',system-ui,sans-serif;
+  --bg:      #f8f5f0;
+  --surface: #ffffff;
+  --border:  #e8e2d8;
+  --text:    #1a1614;
+  --muted:   #7a7068;
+  --subtle:  #b0a89e;
+  --accent:  #1a6b40;
+  --accent2: #e9f2ec;
+  --a2:  #d4f5e2; --a2t: #145e30;
+  --b1:  #fef4c0; --b1t: #7a5500;
+  --b2:  #fde0dc; --b2t: #8b2218;
+  --hh: 56px; --fh: 48px;
+  --serif: 'Lora', 'Georgia', serif;
+  --sans:  'DM Sans', system-ui, sans-serif;
+  --radius: 14px;
+  --trans: .18s ease;
 }
-html { font-size:16px; }
-body { font-family:var(--sans); background:var(--bg); color:var(--text); -webkit-text-size-adjust:100%; overflow-x:hidden; }
+[data-theme="dark"] {
+  --bg:      #111210;
+  --surface: #1c1e1b;
+  --border:  #2e3129;
+  --text:    #e8e4dc;
+  --muted:   #8a8a7e;
+  --subtle:  #5a5a52;
+  --accent:  #4dbd7a;
+  --accent2: #1a2e1f;
+  --a2:  #1a3322; --a2t: #6ee09a;
+  --b1:  #302a10; --b1t: #e8c44a;
+  --b2:  #300e0e; --b2t: #f08080;
+}
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: var(--sans); background: var(--bg); color: var(--text);
+  -webkit-text-size-adjust: 100%; overflow-x: hidden;
+  transition: background var(--trans), color var(--trans);
+}
 
-/* HEADER */
-header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 1.5rem; height:var(--hh); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:40; }
-.logo { font-family:var(--serif); font-size:1.4rem; color:var(--accent); cursor:pointer; user-select:none; }
-.logo span { color:var(--text); }
-#updated { font-size:.72rem; color:var(--muted); }
+/* ── HEADER ── */
+header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 1.5rem; height: var(--hh);
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 40;
+  transition: background var(--trans), border-color var(--trans);
+}
+.logo {
+  font-family: var(--serif); font-size: 1.4rem; color: var(--accent);
+  cursor: pointer; user-select: none; letter-spacing: -.01em;
+}
+.logo span { color: var(--text); }
+.header-right { display: flex; align-items: center; gap: .75rem; }
+#updated { font-size: .7rem; color: var(--subtle); }
+.icon-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--border); background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--muted); transition: all .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent2); }
 
-/* FILTER BAR */
-.fbar { background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:var(--hh); z-index:30; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
-.fbar::-webkit-scrollbar { display:none; }
-.finner { display:flex; align-items:center; padding:0 1.5rem; height:var(--fh); min-width:max-content; gap:0; }
-.fg { display:flex; align-items:center; gap:4px; flex-shrink:0; }
-.fg+.fg { margin-left:.85rem; padding-left:.85rem; border-left:1px solid var(--border); }
-.flabel { font-size:.62rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-right:2px; }
-.pill { padding:3px 10px; border-radius:100px; border:1px solid var(--border); background:transparent; font-family:var(--sans); font-size:.74rem; color:var(--muted); cursor:pointer; transition:all .12s; white-space:nowrap; line-height:1.7; -webkit-tap-highlight-color:transparent; }
-.pill:hover { border-color:var(--accent); color:var(--accent); }
-.pill.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:500; }
+/* ── FILTER BAR ── */
+.fbar {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  position: sticky; top: var(--hh); z-index: 30;
+  overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  transition: background var(--trans), border-color var(--trans);
+}
+.fbar::-webkit-scrollbar { display: none; }
+.finner {
+  display: flex; align-items: center; padding: 0 1.5rem;
+  height: var(--fh); min-width: max-content; gap: 0;
+}
+.fg { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.fg + .fg { margin-left: .85rem; padding-left: .85rem; border-left: 1px solid var(--border); }
+.flabel { font-size: .62rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-right: 2px; }
+.pill {
+  padding: 3px 10px; border-radius: 100px;
+  border: 1px solid var(--border); background: transparent;
+  font-family: var(--sans); font-size: .74rem; color: var(--muted);
+  cursor: pointer; transition: all .12s; white-space: nowrap; line-height: 1.7;
+  -webkit-tap-highlight-color: transparent;
+}
+.pill:hover { border-color: var(--accent); color: var(--accent); }
+.pill.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
+.fg-search { margin-left: auto; }
+.swrap { position: relative; }
+.sinput {
+  padding: 4px 10px 4px 30px; border: 1.5px solid var(--accent);
+  border-radius: 100px; background: var(--accent2);
+  font-family: var(--sans); font-size: .78rem; color: var(--text);
+  width: 155px; outline: none; transition: width .2s, box-shadow .15s;
+}
+.sinput::placeholder { color: var(--muted); }
+.sinput:focus { width: 210px; box-shadow: 0 0 0 3px rgba(26,107,64,.12); }
+.sico { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); pointer-events: none; }
 
-/* Search — FIRST in filter bar, highlighted */
-.fg-search { margin-right:.85rem; padding-right:.85rem; border-right:1px solid var(--border); order:-1; }
-.swrap { position:relative; }
-.sinput { padding:4px 10px 4px 30px; border:1.5px solid var(--accent); border-radius:100px; background:var(--accent2); font-family:var(--sans); font-size:.78rem; color:var(--text); width:160px; outline:none; transition:width .2s,box-shadow .15s; }
-.sinput::placeholder { color:var(--muted); }
-.sinput:focus { width:220px; box-shadow:0 0 0 3px rgba(22,101,58,.1); }
-.sico { position:absolute; left:9px; top:50%; transform:translateY(-50%); pointer-events:none; }
+/* ── MAIN ── */
+.main { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+#stats { font-size: .78rem; color: var(--muted); margin-bottom: 1.1rem; }
+#stats b { color: var(--text); }
 
-/* MAIN */
-.main { max-width:1200px; margin:0 auto; padding:1.25rem 1.5rem; }
-#stats { font-size:.78rem; color:var(--muted); margin-bottom:1rem; }
-#stats b { color:var(--text); }
+/* ── RECOMMENDATION BANNER ── */
+.rec-banner {
+  background: var(--accent2); border: 1px solid var(--accent);
+  border-radius: var(--radius); padding: .75rem 1.1rem;
+  margin-bottom: 1.25rem; font-size: .8rem; color: var(--accent);
+  display: flex; align-items: center; gap: .5rem;
+  animation: slidedown .3s ease;
+}
+@keyframes slidedown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:none} }
 
-/* MASONRY — pure CSS, most reliable */
-.masonry { display:flex; gap:1rem; align-items:flex-start; }
-.masonry-col { flex:1; min-width:0; display:flex; flex-direction:column; gap:1rem; }
+/* ── MASONRY — JS-driven flex columns ── */
+.masonry { display: flex; gap: 1rem; align-items: flex-start; }
+.mcol    { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1rem; }
+
+/* ── CARD ── */
 .card {
-  display:block;
-  background:var(--surface); border:1px solid var(--border); border-radius:12px;
-  padding:1rem 1.1rem;
-  cursor:pointer; transition:transform .13s,box-shadow .13s;
-  -webkit-tap-highlight-color:transparent;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem 1.15rem;
+  cursor: pointer; transition: transform .13s, box-shadow .13s, background var(--trans);
+  -webkit-tap-highlight-color: transparent; position: relative;
 }
-.card:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.08); }
-.cmeta { display:flex; align-items:center; justify-content:space-between; margin-bottom:.45rem; }
-.csrc { font-size:.63rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
-.lvl { font-size:.63rem; font-weight:600; padding:2px 7px; border-radius:100px; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,.08); }
+[data-theme="dark"] .card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.3); }
+.card.read { opacity: .65; }
+.card.read::after {
+  content: '✓'; position: absolute; top: .6rem; right: .6rem;
+  font-size: .65rem; color: var(--accent); background: var(--accent2);
+  padding: 1px 5px; border-radius: 100px;
+}
+.cmeta { display: flex; align-items: center; justify-content: space-between; margin-bottom: .45rem; }
+.csrc  { font-size: .63rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.lvl   { font-size: .63rem; font-weight: 600; padding: 2px 7px; border-radius: 100px; }
 .lvl-a2{background:var(--a2);color:var(--a2t);}
 .lvl-b1{background:var(--b1);color:var(--b1t);}
 .lvl-b2{background:var(--b2);color:var(--b2t);}
-.ctitle { font-family:var(--serif); font-size:.97rem; line-height:1.42; font-weight:600; color:var(--text); margin-bottom:.4rem; }
-.cdesc { font-size:.79rem; color:var(--muted); line-height:1.6; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:.55rem; }
-.cfoot { display:flex; align-items:center; justify-content:space-between; padding-top:.5rem; border-top:1px solid var(--border); }
-.cdate { font-size:.68rem; color:var(--subtle); }
-.ctopic { font-size:.63rem; font-weight:600; padding:2px 7px; border-radius:4px; background:var(--accent2); color:var(--accent); text-transform:capitalize; }
+.ctitle { font-family: var(--serif); font-size: .97rem; line-height: 1.42; font-weight: 600; color: var(--text); margin-bottom: .4rem; }
+.cdesc  { font-size: .79rem; color: var(--muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: .55rem; }
+.cfoot  { display: flex; align-items: center; justify-content: space-between; padding-top: .5rem; border-top: 1px solid var(--border); }
+.cdate  { font-size: .68rem; color: var(--subtle); }
+.ctopic { font-size: .63rem; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: var(--accent2); color: var(--accent); text-transform: capitalize; }
 
-/* STATE */
-.state { padding:4rem 1rem; text-align:center; color:var(--muted); }
-.state h3 { font-family:var(--serif); color:var(--text); margin-bottom:.4rem; font-size:1.1rem; }
-.state p { font-size:.82rem; line-height:1.7; max-width:360px; margin:0 auto; }
-.spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .75s linear infinite; margin:0 auto 1rem; }
-@keyframes spin{to{transform:rotate(360deg);}}
-.retry { margin-top:1rem; padding:7px 18px; background:var(--accent); color:#fff; border:none; border-radius:8px; font-family:var(--sans); font-size:.82rem; font-weight:500; cursor:pointer; }
+/* ── STATES ── */
+.state { padding: 4rem 1rem; text-align: center; color: var(--muted); }
+.state h3 { font-family: var(--serif); color: var(--text); margin-bottom: .4rem; font-size: 1.1rem; }
+.state p  { font-size: .82rem; line-height: 1.7; max-width: 360px; margin: 0 auto; }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .75s linear infinite; margin: 0 auto 1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.retry { margin-top: 1rem; padding: 7px 18px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-family: var(--sans); font-size: .82rem; font-weight: 500; cursor: pointer; }
 
-/* ══ READER ══ */
-.overlay { display:none; position:fixed; inset:0; z-index:50; background:var(--bg); overflow-y:auto; -webkit-overflow-scrolling:touch; }
-.overlay.open { display:block; animation:pagein .18s ease; }
-@keyframes pagein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-
-.r-header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 2rem; height:56px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:10; }
-.r-back { display:flex; align-items:center; gap:.4rem; background:none; border:none; font-family:var(--sans); font-size:.82rem; color:var(--muted); cursor:pointer; padding:6px 0; transition:color .12s; }
-.r-back:hover { color:var(--accent); }
-.r-badges { display:flex; align-items:center; gap:.5rem; }
-
-.r-body { max-width:660px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
-
-.r-eyebrow { display:flex; align-items:center; gap:.5rem; margin-bottom:.9rem; flex-wrap:wrap; }
-.r-source { font-size:.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
-.r-dot { width:3px; height:3px; border-radius:50%; background:var(--subtle); flex-shrink:0; }
-.r-date { font-size:.72rem; color:var(--subtle); }
-
-.r-title { font-family:var(--serif); font-size:2rem; line-height:1.25; font-weight:600; color:var(--text); margin-bottom:1.5rem; }
-.r-divider { border:none; border-top:1px solid var(--border); margin:1.75rem 0; }
-.r-hint { display:inline-flex; align-items:center; gap:.4rem; font-size:.75rem; color:var(--muted); padding:.4rem .75rem; background:var(--accent2); border-radius:8px; margin-bottom:1.75rem; }
-
-/* Article body — Inter for readability */
-.r-article p { font-family:var(--sans); font-size:1.05rem; line-height:1.88; color:#28221f; margin-bottom:1.25rem; }
-.r-article h2 { font-family:var(--serif); font-size:1.3rem; font-weight:600; color:var(--text); margin:2rem 0 .7rem; line-height:1.3; }
-.r-article h3 { font-family:var(--serif); font-size:1.05rem; font-weight:400; font-style:italic; color:var(--text); margin:1.5rem 0 .5rem; }
-.r-article blockquote { border-left:3px solid var(--accent); padding:.65rem 1.1rem; margin:1.25rem 0; color:var(--muted); font-style:italic; font-family:var(--serif); font-size:1rem; line-height:1.7; background:var(--accent2); border-radius:0 8px 8px 0; }
-.w { cursor:pointer; border-radius:3px; padding:0 1px; transition:background .1s; display:inline; }
-.w:hover { background:var(--b1); }
-
-.rskel { margin:2rem 0; display:flex; flex-direction:column; gap:.8rem; }
-.rskel-line { background:var(--border); border-radius:4px; height:14px; animation:pulse 1.2s ease infinite; }
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-.r-open-btn { display:inline-flex; align-items:center; gap:.45rem; margin-top:2rem; padding:.65rem 1.35rem; background:var(--accent); color:#fff; border-radius:9px; text-decoration:none; font-family:var(--sans); font-size:.85rem; font-weight:500; transition:opacity .13s; }
-.r-open-btn:hover { opacity:.85; }
-
-/* WORD POPUP — Russian translation */
-.wpop { position:fixed; z-index:60; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:.8rem 1rem 1rem; max-width:240px; box-shadow:0 8px 28px rgba(0,0,0,.13); opacity:0; pointer-events:none; transition:opacity .15s; font-family:var(--sans); }
-.wpop.show { opacity:1; pointer-events:auto; }
-.wclose { position:absolute; top:.4rem; right:.6rem; background:none; border:none; font-size:.85rem; color:var(--muted); cursor:pointer; }
-.wword { font-family:var(--serif); font-size:1.1rem; color:var(--text); margin-bottom:.15rem; }
-.wphon { font-size:.72rem; color:var(--muted); margin-bottom:.5rem; }
-.wtrans { font-size:.95rem; font-weight:600; color:var(--accent); margin-bottom:.3rem; line-height:1.4; }
-.wex { font-size:.75rem; color:var(--muted); font-style:italic; line-height:1.5; margin-top:.3rem; }
-.wloading { font-size:.8rem; color:var(--muted); }
-
-/* RESPONSIVE */
-@media(max-width:640px){
-  :root{--fh:44px;}
-  header,.finner{padding-left:1rem;padding-right:1rem;}
-  .main{padding:1rem;}
-  /* masonry handled by flex-direction above */
-  .sinput{width:120px;}
-  .sinput:focus{width:155px;}
-  .r-header{padding:0 1rem;}
-  .r-body{padding:1.5rem 1rem 4rem;}
-  .r-title{font-size:1.4rem;}
-  .r-article p{font-size:1rem;}
+/* ════════════════════════════════════════════
+   READER — full page
+   ════════════════════════════════════════════ */
+.overlay {
+  display: none; position: fixed; inset: 0; z-index: 50;
+  background: var(--bg); overflow-y: auto; -webkit-overflow-scrolling: touch;
 }
-@media(max-width:640px){.masonry{flex-direction:column;}}
-@media(min-width:641px) and (max-width:960px){.masonry-col:nth-child(3){display:none;}}
+.overlay.open { display: block; animation: pagein .2s ease; }
+@keyframes pagein { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+.r-header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 2rem; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10;
+}
+.r-back {
+  display: flex; align-items: center; gap: .4rem;
+  background: none; border: none; font-family: var(--sans);
+  font-size: .82rem; color: var(--muted); cursor: pointer; padding: 6px 0;
+  transition: color .12s;
+}
+.r-back:hover { color: var(--accent); }
+.r-actions { display: flex; align-items: center; gap: .5rem; }
+.r-save-btn {
+  display: flex; align-items: center; gap: .35rem;
+  padding: 4px 12px; border-radius: 100px;
+  border: 1px solid var(--border); background: transparent;
+  font-family: var(--sans); font-size: .75rem; color: var(--muted);
+  cursor: pointer; transition: all .12s;
+}
+.r-save-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent2); }
+.r-save-btn.saved { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.r-body { max-width: 680px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+.r-eyebrow { display: flex; align-items: center; gap: .5rem; margin-bottom: .9rem; flex-wrap: wrap; }
+.r-source { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.r-dot    { width: 3px; height: 3px; border-radius: 50%; background: var(--subtle); flex-shrink: 0; }
+.r-date   { font-size: .72rem; color: var(--subtle); }
+.r-title  {
+  font-family: var(--serif); font-size: 2.1rem; line-height: 1.22;
+  font-weight: 600; color: var(--text); margin-bottom: 1.5rem;
+  letter-spacing: -.01em;
+}
+.r-divider { border: none; border-top: 1px solid var(--border); margin: 1.75rem 0; }
+.r-hint {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .75rem; color: var(--muted); padding: .4rem .75rem;
+  background: var(--accent2); border-radius: 8px; margin-bottom: 1.75rem;
+}
+
+/* Article typography — Lora for beautiful reading */
+.r-article p {
+  font-family: var(--serif); font-size: 1.1rem; line-height: 1.9;
+  color: var(--text); margin-bottom: 1.3rem; font-weight: 400;
+}
+.r-article h2 {
+  font-family: var(--serif); font-size: 1.35rem; font-weight: 600;
+  color: var(--text); margin: 2.25rem 0 .75rem; line-height: 1.3;
+}
+.r-article h3 {
+  font-family: var(--serif); font-size: 1.1rem; font-weight: 400;
+  font-style: italic; color: var(--text); margin: 1.75rem 0 .6rem;
+}
+.r-article blockquote {
+  border-left: 3px solid var(--accent); padding: .75rem 1.25rem;
+  margin: 1.5rem 0; font-family: var(--serif); font-size: 1.05rem;
+  line-height: 1.75; font-style: italic; color: var(--muted);
+  background: var(--accent2); border-radius: 0 10px 10px 0;
+}
+.w {
+  cursor: pointer; border-radius: 3px; padding: 0 1px;
+  transition: background .1s; display: inline;
+  border-bottom: 1px dotted var(--subtle);
+}
+.w:hover { background: var(--b1); border-bottom-color: var(--accent); }
+
+/* Skeleton loader */
+.rskel { margin: 2rem 0; display: flex; flex-direction: column; gap: .85rem; }
+.rskel-line { background: var(--border); border-radius: 4px; height: 14px; animation: pulse 1.3s ease infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+.r-open-btn {
+  display: inline-flex; align-items: center; gap: .45rem;
+  margin-top: 2rem; padding: .65rem 1.35rem;
+  background: var(--accent); color: #fff; border-radius: 10px;
+  text-decoration: none; font-family: var(--sans);
+  font-size: .85rem; font-weight: 500; transition: opacity .13s;
+}
+.r-open-btn:hover { opacity: .85; }
+
+/* ── WORD POPUP ── */
+.wpop {
+  position: fixed; z-index: 60; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: .85rem 1rem 1.1rem; max-width: 250px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.14);
+  opacity: 0; pointer-events: none; transition: opacity .15s;
+  font-family: var(--sans);
+}
+.wpop.show { opacity: 1; pointer-events: auto; }
+.wclose { position: absolute; top: .4rem; right: .6rem; background: none; border: none; font-size: .85rem; color: var(--muted); cursor: pointer; }
+.wword  { font-family: var(--serif); font-size: 1.15rem; color: var(--text); margin-bottom: .15rem; }
+.wphon  { font-size: .72rem; color: var(--muted); margin-bottom: .5rem; }
+.wtrans { font-size: 1rem; font-weight: 600; color: var(--accent); margin-bottom: .25rem; }
+.wex    { font-size: .75rem; color: var(--muted); font-style: italic; line-height: 1.5; }
+.wsave  {
+  display: flex; align-items: center; gap: .3rem; margin-top: .65rem;
+  font-size: .72rem; color: var(--accent); cursor: pointer;
+  background: none; border: none; font-family: var(--sans); padding: 0;
+}
+.wsave:hover { text-decoration: underline; }
+
+/* ════════════════════════════════════════════
+   PROFILE PANEL
+   ════════════════════════════════════════════ */
+.panel-overlay {
+  display: none; position: fixed; inset: 0; z-index: 55;
+  background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
+}
+.panel-overlay.open { display: block; animation: fadein .18s ease; }
+@keyframes fadein { from{opacity:0} to{opacity:1} }
+
+.panel {
+  position: fixed; right: 0; top: 0; bottom: 0; z-index: 56;
+  width: min(380px, 100vw); background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  animation: slidein .2s ease;
+  font-family: var(--sans);
+}
+@keyframes slidein { from{transform:translateX(100%)} to{transform:none} }
+
+.panel-head {
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.panel-head h2 { font-family: var(--serif); font-size: 1.2rem; }
+.panel-close { background: none; border: none; font-size: 1.1rem; color: var(--muted); cursor: pointer; padding: 4px; }
+
+.panel-body { flex: 1; overflow-y: auto; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+/* Profile stats */
+.profile-stats {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem;
+}
+.pstat {
+  background: var(--bg); border-radius: 10px; padding: .75rem;
+  text-align: center; border: 1px solid var(--border);
+}
+.pstat-n { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; color: var(--accent); }
+.pstat-l { font-size: .68rem; color: var(--muted); margin-top: .1rem; }
+
+/* Streak */
+.streak-row { display: flex; align-items: center; gap: .75rem; background: var(--bg); border-radius: 10px; padding: .75rem 1rem; border: 1px solid var(--border); }
+.streak-n { font-family: var(--serif); font-size: 1.4rem; font-weight: 600; color: var(--accent); }
+.streak-l { font-size: .78rem; color: var(--muted); }
+
+/* Settings */
+.setting-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .65rem 0; border-bottom: 1px solid var(--border);
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-label { font-size: .85rem; color: var(--text); }
+.setting-sub   { font-size: .72rem; color: var(--muted); margin-top: .1rem; }
+
+/* Toggle switch */
+.toggle { position: relative; width: 40px; height: 22px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute; inset: 0; border-radius: 11px;
+  background: var(--border); cursor: pointer; transition: background .2s;
+}
+.toggle input:checked + .toggle-track { background: var(--accent); }
+.toggle-track::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; transition: transform .2s;
+}
+.toggle input:checked + .toggle-track::after { transform: translateX(18px); }
+
+/* Level selector */
+.level-select {
+  display: flex; gap: .4rem;
+}
+.level-opt {
+  padding: 3px 10px; border-radius: 100px;
+  border: 1px solid var(--border); background: transparent;
+  font-family: var(--sans); font-size: .74rem; color: var(--muted);
+  cursor: pointer; transition: all .12s;
+}
+.level-opt.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Topic interests */
+.topic-grid { display: flex; flex-wrap: wrap; gap: .4rem; }
+.topic-chip {
+  padding: 4px 12px; border-radius: 100px;
+  border: 1px solid var(--border); background: transparent;
+  font-family: var(--sans); font-size: .76rem; color: var(--muted);
+  cursor: pointer; transition: all .12s;
+}
+.topic-chip.liked { background: var(--accent2); border-color: var(--accent); color: var(--accent); }
+.topic-chip.disliked { opacity: .45; text-decoration: line-through; }
+
+/* Saved words list */
+.words-list { display: flex; flex-direction: column; gap: .5rem; }
+.word-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .5rem .75rem; background: var(--bg); border-radius: 8px;
+  border: 1px solid var(--border); font-size: .82rem;
+}
+.word-en  { font-family: var(--serif); color: var(--text); }
+.word-ru  { color: var(--accent); font-weight: 500; font-size: .78rem; }
+.word-del { background: none; border: none; color: var(--subtle); cursor: pointer; font-size: .8rem; padding: 2px 4px; }
+.word-del:hover { color: var(--b2t); }
+.empty-state { font-size: .82rem; color: var(--muted); text-align: center; padding: 1.5rem; }
+
+/* ── RESPONSIVE ── */
+@media(max-width: 640px) {
+  :root { --fh: 44px; }
+  header, .finner { padding-left: 1rem; padding-right: 1rem; }
+  .main { padding: 1rem; }
+  .masonry { flex-direction: column; }
+  .sinput { width: 120px; }
+  .sinput:focus { width: 160px; }
+  .r-header { padding: 0 1rem; }
+  .r-body { padding: 1.5rem 1rem 4rem; }
+  .r-title { font-size: 1.5rem; }
+  .r-article p { font-size: 1rem; }
+  .panel { width: 100vw; }
+}
+@media(min-width: 641px) and (max-width: 960px) {
+  .masonry { }
+  /* 2 columns handled by JS */
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo" id="logo">News<span>learn</span></div>
-  <span id="updated"></span>
+  <div class="header-right">
+    <span id="updated"></span>
+    <button class="icon-btn" id="theme-btn" title="Toggle dark mode" aria-label="Toggle dark mode">
+      <svg id="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <button class="icon-btn" id="profile-btn" title="Profile" aria-label="Profile">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
+  </div>
 </header>
 
 <div class="fbar"><div class="finner">
-  <!-- Search FIRST -->
-  <div class="fg fg-search">
+  <!-- Search first -->
+  <div class="fg" style="margin-right:.85rem;padding-right:.85rem;border-right:1px solid var(--border)">
     <div class="swrap">
-      <svg class="sico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16653a" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input class="sinput" id="search" type="search" placeholder="Search…" autocomplete="off">
+      <svg class="sico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="sinput" id="search" type="search" placeholder="Search…" autocomplete="off" aria-label="Search articles">
     </div>
   </div>
   <div class="fg">
@@ -173,9 +435,11 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
     <button class="pill active" data-f="topic" data-v="all">All</button>
     <button class="pill" data-f="topic" data-v="technology">Tech</button>
     <button class="pill" data-f="topic" data-v="science">Science</button>
-    <button class="pill" data-f="topic" data-v="world">World</button>
-    <button class="pill" data-f="topic" data-v="business">Business</button>
     <button class="pill" data-f="topic" data-v="health">Health</button>
+    <button class="pill" data-f="topic" data-v="business">Business</button>
+    <button class="pill" data-f="topic" data-v="sport">Sport</button>
+    <button class="pill" data-f="topic" data-v="culture">Culture</button>
+    <button class="pill" data-f="topic" data-v="world">World</button>
   </div>
   <div class="fg">
     <span class="flabel">Source</span>
@@ -189,6 +453,9 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 </div></div>
 
 <div class="main">
+  <div id="rec-banner" style="display:none" class="rec-banner">
+    <span>✨</span><span id="rec-text"></span>
+  </div>
   <div id="stats"></div>
   <div id="root"><div class="state"><div class="spinner"></div><h3>Loading…</h3></div></div>
 </div>
@@ -198,90 +465,247 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
   <div class="r-header">
     <button class="r-back" id="r-back">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-      Назад
+      Back
     </button>
-    <div class="r-badges" id="r-badges"></div>
+    <div class="r-actions">
+      <button class="r-save-btn" id="r-save-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span id="r-save-label">Save</span>
+      </button>
+      <span class="lvl" id="r-lvl-badge"></span>
+    </div>
   </div>
   <div class="r-body" id="r-body"></div>
 </div>
 
 <!-- WORD POPUP -->
-<div class="wpop" id="wpop">
-  <button class="wclose" id="wclose">✕</button>
+<div class="wpop" id="wpop" role="tooltip" aria-live="polite">
+  <button class="wclose" id="wclose" aria-label="Close">✕</button>
   <div id="wbody"></div>
 </div>
 
+<!-- PROFILE PANEL -->
+<div class="panel-overlay" id="panel-overlay">
+  <div class="panel" id="panel" role="dialog" aria-label="Profile">
+    <div class="panel-head">
+      <h2>My Profile</h2>
+      <button class="panel-close" id="panel-close" aria-label="Close">✕</button>
+    </div>
+    <div class="panel-body" id="panel-body">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
 <script>
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
 let ALL = [], ARTICLES = [];
 let F = {level:'all', topic:'all', source:'all'}, Q = '';
-let DICT = {}, popWord = null;
+let DICT = {}, popWord = null, currentArticleIdx = null;
 
-// ── Utils ─────────────────────────────────────────────────────────────────────
+// ── localStorage helpers ──────────────────────────────────────────────────────
+const LS = {
+  get: k => { try { return JSON.parse(localStorage.getItem('nl_'+k)); } catch { return null; } },
+  set: (k,v) => { try { localStorage.setItem('nl_'+k, JSON.stringify(v)); } catch {} },
+};
+
+// ── Profile data ──────────────────────────────────────────────────────────────
+function getProfile() {
+  return LS.get('profile') || {
+    darkMode:     false,
+    targetLevel:  'b1',
+    topicWeights: { technology:1, science:1, health:1.2, business:1, sport:1.2, culture:1.2, world:0.8 },
+    readArticles: [],   // array of urls
+    savedArticles:[],   // array of urls
+    savedWords:   [],   // [{word, translation}]
+    wordsLearned: 0,
+    streak:       0,
+    lastVisit:    null,
+  };
+}
+function saveProfile(p) { LS.set('profile', p); }
+
+// ── Streak tracking ───────────────────────────────────────────────────────────
+function updateStreak() {
+  const p = getProfile();
+  const today = new Date().toDateString();
+  if (p.lastVisit === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  p.streak = (p.lastVisit === yesterday) ? (p.streak + 1) : 1;
+  p.lastVisit = today;
+  saveProfile(p);
+}
+updateStreak();
+
+// ════════════════════════════════════════════
+// DARK MODE
+// ════════════════════════════════════════════
+function applyTheme(dark) {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
+  const icon = document.getElementById('theme-icon');
+  icon.innerHTML = dark
+    ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+    : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+}
+(function() {
+  const p = getProfile();
+  applyTheme(p.darkMode);
+})();
+document.getElementById('theme-btn').addEventListener('click', () => {
+  const p = getProfile();
+  p.darkMode = !p.darkMode;
+  saveProfile(p);
+  applyTheme(p.darkMode);
+});
+
+// ════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════
 function h(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function clean(s){
+function clean(s) {
   return String(s||'')
-    // Strip HTML tags
-    .replace(/<style[\s\S]*?<\/style>/gi,'')
-    .replace(/<script[\s\S]*?<\/script>/gi,'')
-    .replace(/<br\s*\/?>/gi,' ').replace(/<\/p>/gi,' ').replace(/<\/li>/gi,' ')
-    .replace(/<[^>]+>/g,'')
-    // Decode entities
-    .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&nbsp;/g,' ')
+    .replace(/<style[\s\S]*?<\/style>/gi,'').replace(/<script[\s\S]*?<\/script>/gi,'')
+    .replace(/<br\s*\/?>/gi,' ').replace(/<\/p>/gi,' ').replace(/<[^>]+>/g,'')
+    .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+    .replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&nbsp;/g,' ')
     .replace(/&#x2019;|&#8217;/g,"'").replace(/&#x2018;|&#8216;/g,"'")
     .replace(/&#x201C;|&#8220;/g,'"').replace(/&#x201D;|&#8221;/g,'"')
     .replace(/&#x2013;|&#8211;/g,'–').replace(/&#x2014;|&#8212;/g,'—')
-    .replace(/&#x2026;|&#8230;/g,'…').replace(/&#xA0;|&#160;/g,' ')
     .replace(/&#[xX][0-9a-fA-F]+;/g,'').replace(/&#\d+;/g,'').replace(/&[a-z]+;/g,' ')
-    // Remove promo patterns
-    .replace(/(Sign up|Subscribe|Get our|Click here|Read more|More from|Follow us)[^.!?\n]{0,180}[.!?]?/gi,'')
-    .replace(/https?:\/\/\S+/g,'')
-    .replace(/\s+/g,' ').trim();
+    .replace(/(Sign up|Subscribe|Get our|Newsletter)[^.!\n]{0,200}[.!]?/gi,'')
+    .replace(/https?:\/\/\S+/g,'').replace(/\s+/g,' ').trim();
 }
 
-function fmtDate(s){
+function fmtDate(s) {
   const d = new Date(s);
   return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
 }
 
-function isJunk(a){
+function isJunk(a) {
   if (!a.title || a.title.length < 20) return true;
   if (!a.url || !a.url.startsWith('http')) return true;
   if (a.title.trim().split(/\s+/).length < 4) return true;
   return false;
 }
 
-// ── Render cards ──────────────────────────────────────────────────────────────
-function render(){
-  const list = ALL.filter(a => {
+function colCount() {
+  return window.innerWidth < 641 ? 1 : window.innerWidth < 961 ? 2 : 3;
+}
+
+// ════════════════════════════════════════════
+// RECOMMENDATION ENGINE
+// ════════════════════════════════════════════
+function scoreArticle(a, profile) {
+  let score = 0;
+  // Topic weight from profile
+  score += (profile.topicWeights[a.topic] || 1) * 10;
+  // Prefer target level and one below
+  const levels = ['a2','b1','b2'];
+  const tIdx = levels.indexOf(profile.targetLevel);
+  const aIdx = levels.indexOf(a.level);
+  if (aIdx === tIdx) score += 5;
+  else if (aIdx === tIdx - 1) score += 3; // slightly easier = good warmup
+  else if (aIdx === tIdx + 1) score += 2; // slightly harder = stretch
+  // Penalize already read
+  if (profile.readArticles.includes(a.url)) score -= 20;
+  // Server-side priority (low = violence/terrorism)
+  score += (a.priority || 1) * 3;
+  // Freshness bonus
+  const age = (Date.now() - new Date(a.date)) / 3600000; // hours
+  score += Math.max(0, 5 - age * 0.1);
+  return score;
+}
+
+function sortByRecommendation(list) {
+  const profile = getProfile();
+  return [...list].sort((a, b) => scoreArticle(b, profile) - scoreArticle(a, profile));
+}
+
+function recordInterest(topic, level) {
+  const p = getProfile();
+  if (!p.topicWeights[topic]) p.topicWeights[topic] = 1;
+  p.topicWeights[topic] = Math.min(3, p.topicWeights[topic] * 1.15);
+  // Gradually upgrade target level
+  const levels = ['a2','b1','b2'];
+  const tIdx = levels.indexOf(p.targetLevel);
+  const aIdx = levels.indexOf(level);
+  if (aIdx > tIdx) {
+    p.topicWeights['_levelProgress'] = (p.topicWeights['_levelProgress'] || 0) + 1;
+    if (p.topicWeights['_levelProgress'] >= 5) {
+      p.targetLevel = levels[Math.min(tIdx + 1, 2)];
+      p.topicWeights['_levelProgress'] = 0;
+    }
+  }
+  saveProfile(p);
+}
+
+function markAsRead(url) {
+  const p = getProfile();
+  if (!p.readArticles.includes(url)) {
+    p.readArticles.unshift(url);
+    if (p.readArticles.length > 200) p.readArticles = p.readArticles.slice(0,200);
+    saveProfile(p);
+  }
+}
+
+// ════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════
+function filtered() {
+  return ALL.filter(a => {
     if (isJunk(a)) return false;
     if (F.level  !== 'all' && a.level  !== F.level)  return false;
     if (F.topic  !== 'all' && a.topic  !== F.topic)  return false;
     if (F.source !== 'all' && a.source !== F.source) return false;
-    if (Q){
+    if (Q) {
       const q = Q.toLowerCase();
       if (!a.title.toLowerCase().includes(q) && !(a.desc||'').toLowerCase().includes(q)) return false;
     }
     return true;
   });
+}
 
-  const total = ALL.filter(a=>!isJunk(a)).length;
+function render() {
+  const profile = getProfile();
+  let list = filtered();
+
+  // Apply recommendation sort when no manual filters active
+  if (F.level === 'all' && F.topic === 'all' && F.source === 'all' && !Q) {
+    list = sortByRecommendation(list);
+    // Show recommendation banner
+    const topTopic = Object.entries(profile.topicWeights)
+      .filter(([k]) => !k.startsWith('_'))
+      .sort((a,b) => b[1]-a[1])[0];
+    if (topTopic && topTopic[1] > 1.2) {
+      document.getElementById('rec-banner').style.display = 'flex';
+      document.getElementById('rec-text').textContent =
+        `Personalized for you · More ${topTopic[0]} based on your reading`;
+    }
+  } else {
+    document.getElementById('rec-banner').style.display = 'none';
+  }
+
+  const total = ALL.filter(a => !isJunk(a)).length;
   document.getElementById('stats').innerHTML =
     list.length === total ? `<b>${list.length}</b> articles` : `<b>${list.length}</b> of <b>${total}</b> articles`;
 
-  if (!list.length){
-    document.getElementById('root').innerHTML='<div class="state"><h3>No results</h3><p>Try different filters.</p></div>';
+  if (!list.length) {
+    document.getElementById('root').innerHTML = '<div class="state"><h3>No results</h3><p>Try different filters.</p></div>';
     return;
   }
 
-  const n = window.innerWidth < 641 ? 1 : window.innerWidth < 961 ? 2 : 3;
+  const n = colCount();
   const cols = Array.from({length:n}, () => []);
-  list.forEach((a,i) => cols[i % n].push(a));
+  list.forEach((a, i) => cols[i % n].push(a));
 
   function cardHtml(a) {
-    const idx = ARTICLES.indexOf(a);
+    const idx  = ARTICLES.indexOf(a);
     const desc = clean(a.desc||'');
-    return `<div class="card" data-idx="${idx}">
+    const read = profile.readArticles.includes(a.url);
+    return `<div class="card${read?' read':''}" data-idx="${idx}" role="button" tabindex="0" aria-label="${h(a.title)}">
       <div class="cmeta"><span class="csrc">${h(a.source)}</span><span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span></div>
       <div class="ctitle">${h(clean(a.title))}</div>
       ${desc ? `<div class="cdesc">${h(desc)}</div>` : ''}
@@ -290,62 +714,67 @@ function render(){
   }
 
   document.getElementById('root').innerHTML =
-    '<div class="masonry">' +
-    cols.map(col => `<div class="masonry-col">${col.map(cardHtml).join('')}</div>`).join('') +
-    '</div>';
+    `<div class="masonry">${cols.map(col=>`<div class="mcol">${col.map(cardHtml).join('')}</div>`).join('')}</div>`;
 
   document.querySelectorAll('.card[data-idx]').forEach(el => {
-    el.addEventListener('click', () => openReader(parseInt(el.dataset.idx)));
+    const open = () => openReader(parseInt(el.dataset.idx));
+    el.addEventListener('click', open);
+    el.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') open(); });
   });
 }
 
-// ── Load ──────────────────────────────────────────────────────────────────────
-async function loadAll(){
-  document.getElementById('stats').textContent='';
-  document.getElementById('root').innerHTML='<div class="state"><div class="spinner"></div><h3>Loading articles…</h3></div>';
+// ════════════════════════════════════════════
+// LOAD NEWS
+// ════════════════════════════════════════════
+async function loadAll() {
+  document.getElementById('stats').textContent = '';
+  document.getElementById('root').innerHTML = '<div class="state"><div class="spinner"></div><h3>Loading articles…</h3></div>';
   try {
-    const res = await fetch('/api/news');
-    if (!res.ok) throw new Error('HTTP '+res.status);
+    const res  = await fetch('/api/news');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    ARTICLES = data.articles||[];
+    ARTICLES = data.articles || [];
     ALL = ARTICLES;
     document.getElementById('updated').textContent =
-      'Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+      'Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     render();
-  } catch(e){
-    document.getElementById('root').innerHTML=
+  } catch(e) {
+    document.getElementById('root').innerHTML =
       `<div class="state"><h3>Could not load</h3><p>${e.message}</p><button class="retry" onclick="loadAll()">Retry</button></div>`;
   }
 }
 
-// ── Reader ────────────────────────────────────────────────────────────────────
-async function openReader(idx){
+// ════════════════════════════════════════════
+// READER
+// ════════════════════════════════════════════
+async function openReader(idx) {
   const a = ARTICLES[idx];
   if (!a) return;
+  currentArticleIdx = idx;
 
-  document.getElementById('r-badges').innerHTML =
-    `<span class="csrc">${h(a.source)}</span><span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span>`;
+  // Update save button
+  updateSaveBtn(a.url);
 
-  document.getElementById('r-body').innerHTML =
-    `<div class="r-eyebrow">
-       <span class="r-source">${h(a.source)}</span>
-       <span class="r-dot"></span><span class="r-date">${fmtDate(a.date)}</span>
-       <span class="r-dot"></span><span class="ctopic">${h(a.topic)}</span>
-     </div>
-     <div class="r-title">${h(clean(a.title))}</div>
-     <hr class="r-divider">
-     <div class="rskel">
-       ${[100,93,97,88,100,91,95,86].map(w=>`<div class="rskel-line" style="width:${w}%"></div>`).join('')}
-     </div>`;
+  // Badge
+  const badge = document.getElementById('r-lvl-badge');
+  badge.className = `lvl lvl-${a.level}`;
+  badge.textContent = a.level.toUpperCase();
 
+  // Show skeleton
+  document.getElementById('r-body').innerHTML = skeletonHtml(a);
   document.getElementById('overlay').classList.add('open');
   document.getElementById('overlay').scrollTop = 0;
   document.body.style.overflow = 'hidden';
 
+  // Track reading
+  markAsRead(a.url);
+  recordInterest(a.topic, a.level);
+
+  // Fetch full article
   try {
-    const res  = await fetch('/api/article?url='+encodeURIComponent(a.url));
+    const res  = await fetch('/api/article?url=' + encodeURIComponent(a.url));
     const data = await res.json();
-    if (data.ok && data.blocks && data.blocks.length >= 2){
+    if (data.ok && data.blocks && data.blocks.length >= 2) {
       renderArticle(a, data.blocks);
     } else {
       renderFallback(a);
@@ -353,7 +782,32 @@ async function openReader(idx){
   } catch { renderFallback(a); }
 }
 
-function tokenize(text){
+function skeletonHtml(a) {
+  return `<div class="r-eyebrow">
+    <span class="r-source">${h(a.source)}</span>
+    <span class="r-dot"></span><span class="r-date">${fmtDate(a.date)}</span>
+  </div>
+  <div class="r-title">${h(clean(a.title))}</div>
+  <hr class="r-divider">
+  <div class="rskel">
+    ${[100,93,97,88,100,91,95,86,100,89].map(w=>`<div class="rskel-line" style="width:${w}%"></div>`).join('')}
+  </div>`;
+}
+
+function readerTop(a) {
+  return `<div class="r-eyebrow">
+    <span class="r-source">${h(a.source)}</span>
+    <span class="r-dot"></span>
+    <span class="r-date">${fmtDate(a.date)}</span>
+    <span class="r-dot"></span>
+    <span class="ctopic">${h(a.topic)}</span>
+  </div>
+  <div class="r-title">${h(clean(a.title))}</div>
+  <hr class="r-divider">
+  <div class="r-hint">💡 Tap any word for Russian translation</div>`;
+}
+
+function tokenize(text) {
   return text.split(/(\b)/).map(tok =>
     /^[a-zA-Z]{2,}$/.test(tok)
       ? `<span class="w" data-word="${tok.toLowerCase()}">${tok}</span>`
@@ -361,114 +815,139 @@ function tokenize(text){
   ).join('');
 }
 
-function blocksHtml(blocks){
-  return blocks.map(b => {
+function blocksHtml(blocks) {
+  return '<div class="r-article">' + blocks.map(b => {
     const t = tokenize(b.text);
     if (b.tag==='h1'||b.tag==='h2') return `<h2>${t}</h2>`;
     if (b.tag==='h3'||b.tag==='h4') return `<h3>${t}</h3>`;
     if (b.tag==='blockquote') return `<blockquote>${t}</blockquote>`;
     return `<p>${t}</p>`;
-  }).join('');
+  }).join('') + '</div>';
 }
 
-function readerShell(a){
-  return `<div class="r-eyebrow">
-    <span class="r-source">${h(a.source)}</span>
-    <span class="r-dot"></span><span class="r-date">${fmtDate(a.date)}</span>
-    <span class="r-dot"></span><span class="ctopic">${h(a.topic)}</span>
-  </div>
-  <div class="r-title">${h(clean(a.title))}</div>
-  <hr class="r-divider">
-  <div class="r-hint">💡 Нажми на слово — получи перевод на русский</div>`;
+function openBtn(url) {
+  return `<a class="r-open-btn" href="${h(url)}" target="_blank" rel="noopener noreferrer">
+    Open original
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+  </a>`;
 }
 
-function renderArticle(a, blocks){
+function renderArticle(a, blocks) {
   document.getElementById('r-body').innerHTML =
-    readerShell(a) +
-    `<div class="r-article">${blocksHtml(blocks)}</div>
-     <hr class="r-divider">
-     <a class="r-open-btn" href="${h(a.url)}" target="_blank" rel="noopener noreferrer">
-       Открыть оригинал
-       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-     </a>`;
-  attachW();
+    readerTop(a) + blocksHtml(blocks) + '<hr class="r-divider">' + openBtn(a.url);
+  attachWordHandlers();
 }
 
-function renderFallback(a){
+function renderFallback(a) {
   const desc = clean(a.desc||'');
   document.getElementById('r-body').innerHTML =
-    readerShell(a) +
+    readerTop(a) +
     (desc ? `<div class="r-article"><p>${tokenize(desc)}</p></div><hr class="r-divider">` : '') +
-    `<a class="r-open-btn" href="${h(a.url)}" target="_blank" rel="noopener noreferrer">
-       Читать полностью
-       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-     </a>`;
-  attachW();
+    openBtn(a.url);
+  attachWordHandlers();
 }
 
-function attachW(){
+function attachWordHandlers() {
   document.querySelectorAll('#r-body .w').forEach(el => {
-    el.addEventListener('click', e => { e.stopPropagation(); translate(e, el.dataset.word); });
+    el.addEventListener('click', e => { e.stopPropagation(); lookupWord(e, el.dataset.word); });
   });
 }
 
-function closeReader(){
+function closeReader() {
   document.getElementById('overlay').classList.remove('open');
-  document.body.style.overflow='';
+  document.body.style.overflow = '';
+  currentArticleIdx = null;
   closePopup();
+  render(); // refresh read indicators
 }
+
+// Save article
+function updateSaveBtn(url) {
+  const p = getProfile();
+  const saved = p.savedArticles.includes(url);
+  const btn = document.getElementById('r-save-btn');
+  const lbl = document.getElementById('r-save-label');
+  btn.classList.toggle('saved', saved);
+  lbl.textContent = saved ? 'Saved' : 'Save';
+}
+
+document.getElementById('r-save-btn').addEventListener('click', () => {
+  const a = currentArticleIdx !== null ? ARTICLES[currentArticleIdx] : null;
+  if (!a) return;
+  const p = getProfile();
+  const idx = p.savedArticles.indexOf(a.url);
+  if (idx === -1) p.savedArticles.unshift(a.url);
+  else p.savedArticles.splice(idx, 1);
+  saveProfile(p);
+  updateSaveBtn(a.url);
+});
+
 document.getElementById('r-back').addEventListener('click', closeReader);
 document.getElementById('logo').addEventListener('click', closeReader);
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeReader(); });
+document.addEventListener('keydown', e => { if (e.key==='Escape') { closeReader(); closePanel(); } });
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('overlay')) closeReader();
+});
 
-// ── Translation (Russian) ─────────────────────────────────────────────────────
-async function translate(e, word){
-  if (popWord===word){ closePopup(); return; }
+// ════════════════════════════════════════════
+// WORD TRANSLATION
+// ════════════════════════════════════════════
+async function lookupWord(e, word) {
+  if (popWord === word) { closePopup(); return; }
   popWord = word;
 
   const pop  = document.getElementById('wpop');
   const body = document.getElementById('wbody');
 
-  const x = Math.min(e.clientX+8, window.innerWidth-250);
-  const y = Math.min(e.clientY+20, window.innerHeight-180);
-  pop.style.left = x+'px';
-  pop.style.top  = y+'px';
-  body.innerHTML = `<div class="wword">${word}</div><div class="wloading">Перевожу…</div>`;
+  const x = Math.min(e.clientX + 8, window.innerWidth - 265);
+  const y = Math.min(e.clientY + 20, window.innerHeight - 200);
+  pop.style.left = x + 'px';
+  pop.style.top  = y + 'px';
+  body.innerHTML = `<div class="wword">${word}</div><div class="wphon" style="color:var(--muted)">Translating…</div>`;
   pop.classList.add('show');
 
-  if (DICT[word]){ showTranslation(word, DICT[word]); return; }
+  if (DICT[word]) { showTranslation(word, DICT[word]); return; }
 
   try {
-    const res  = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|ru&de=newslearn@mail.com`);
-    if (!res.ok) throw new Error('fetch failed');
+    const res  = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|ru`);
     const data = await res.json();
     const tr   = data.responseData?.translatedText;
-    // MyMemory returns uppercase for single words — lowercase it
-    const trClean = tr ? tr.toLowerCase().trim() : '';
-    // Only reject if it's identical to the English word (no translation found)
+    const trClean = (tr||'').toLowerCase().trim();
     if (!trClean || trClean === word.toLowerCase()) throw new Error('no translation');
-    // Capitalize first letter
     const trFinal = trClean.charAt(0).toUpperCase() + trClean.slice(1);
     DICT[word] = { word, translation: trFinal };
     showTranslation(word, DICT[word]);
-  } catch(err) {
-    body.innerHTML = `<div class="wword">${word}</div><div class="wloading" style="color:var(--muted)">Перевод не найден</div>`;
+  } catch {
+    body.innerHTML = `<div class="wword">${word}</div><div class="wphon" style="color:var(--muted)">Translation not found</div>`;
   }
 }
 
-function showTranslation(word, entry){
-  let html = `<div class="wword">${entry.word}</div>`;
-  if (entry.phonetic) html += `<div class="wphon">${entry.phonetic}</div>`;
-  if (entry.translation) {
-    html += `<div class="wtrans">${entry.translation}</div>`;
-  } else if (entry.fallbackDef) {
-    html += `<div class="wphon" style="margin-top:.3rem">Определение (EN):</div><div class="wex">${entry.fallbackDef}</div>`;
-  }
-  document.getElementById('wbody').innerHTML = html;
+function showTranslation(word, entry) {
+  const p = getProfile();
+  const isSaved = p.savedWords.some(w => w.word === word);
+  document.getElementById('wbody').innerHTML =
+    `<div class="wword">${entry.word}</div>
+     <div class="wtrans">${entry.translation || '—'}</div>
+     <button class="wsave" id="wsave-btn">
+       ${isSaved ? '✓ Saved to vocabulary' : '+ Save to vocabulary'}
+     </button>`;
+  document.getElementById('wsave-btn').addEventListener('click', () => {
+    saveWord(word, entry.translation);
+    document.getElementById('wsave-btn').textContent = '✓ Saved to vocabulary';
+  });
 }
 
-function closePopup(){
-  popWord=null;
+function saveWord(word, translation) {
+  const p = getProfile();
+  if (p.savedWords.some(w => w.word === word)) return;
+  p.savedWords.unshift({ word, translation });
+  if (p.savedWords.length > 500) p.savedWords = p.savedWords.slice(0,500);
+  p.wordsLearned++;
+  saveProfile(p);
+}
+
+function closePopup() {
+  popWord = null;
   document.getElementById('wpop').classList.remove('show');
 }
 document.getElementById('wclose').addEventListener('click', closePopup);
@@ -477,20 +956,169 @@ document.addEventListener('click', e => {
   if (pop.classList.contains('show') && !pop.contains(e.target) && !e.target.classList.contains('w')) closePopup();
 });
 
-// ── Filters ───────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════
+// PROFILE PANEL
+// ════════════════════════════════════════════
+function openPanel() {
+  renderPanel();
+  document.getElementById('panel-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePanel() {
+  document.getElementById('panel-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('profile-btn').addEventListener('click', openPanel);
+document.getElementById('panel-close').addEventListener('click', closePanel);
+document.getElementById('panel-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('panel-overlay')) closePanel();
+});
+
+function renderPanel() {
+  const p = getProfile();
+  const TOPICS = ['technology','science','health','business','sport','culture','world'];
+  const LEVELS = ['a2','b1','b2'];
+
+  const wordsHtml = p.savedWords.length === 0
+    ? `<div class="empty-state">No saved words yet.<br>Tap any word while reading to save it.</div>`
+    : p.savedWords.slice(0,50).map(w =>
+        `<div class="word-item">
+          <div><div class="word-en">${h(w.word)}</div><div class="word-ru">${h(w.translation||'')}</div></div>
+          <button class="word-del" data-word="${h(w.word)}" title="Remove">✕</button>
+        </div>`
+      ).join('');
+
+  document.getElementById('panel-body').innerHTML = `
+    <!-- Stats -->
+    <div>
+      <div class="pstat-l" style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Your Progress</div>
+      <div class="profile-stats">
+        <div class="pstat"><div class="pstat-n">${p.readArticles.length}</div><div class="pstat-l">Articles read</div></div>
+        <div class="pstat"><div class="pstat-n">${p.wordsLearned}</div><div class="pstat-l">Words saved</div></div>
+        <div class="pstat"><div class="pstat-n">${p.savedArticles.length}</div><div class="pstat-l">Saved</div></div>
+      </div>
+    </div>
+
+    <!-- Streak -->
+    <div class="streak-row">
+      <div>🔥</div>
+      <div><div class="streak-n">${p.streak} day${p.streak===1?'':'s'}</div><div class="streak-l">reading streak</div></div>
+    </div>
+
+    <!-- Settings -->
+    <div>
+      <div class="pstat-l" style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Settings</div>
+
+      <div class="setting-row">
+        <div><div class="setting-label">Dark mode</div></div>
+        <label class="toggle">
+          <input type="checkbox" id="dark-toggle" ${p.darkMode?'checked':''}>
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Target level</div>
+          <div class="setting-sub">Articles at this level are shown first</div>
+        </div>
+        <div class="level-select">
+          ${LEVELS.map(l=>`<button class="level-opt${p.targetLevel===l?' active':''}" data-level="${l}">${l.toUpperCase()}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Topic interests -->
+    <div>
+      <div class="pstat-l" style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Topic interests</div>
+      <div class="pstat-l" style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem">These shape your personalised feed</div>
+      <div class="topic-grid">
+        ${TOPICS.map(t => {
+          const w = p.topicWeights[t] || 1;
+          const cls = w >= 1.3 ? 'liked' : w <= 0.6 ? 'disliked' : '';
+          const emoji = {technology:'💻',science:'🔬',health:'❤️',business:'📈',sport:'⚽',culture:'🎭',world:'🌍'}[t]||'';
+          return `<button class="topic-chip ${cls}" data-topic="${t}">${emoji} ${t}</button>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- Saved words -->
+    <div>
+      <div class="pstat-l" style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Vocabulary (${p.savedWords.length})</div>
+      <div class="words-list">${wordsHtml}</div>
+    </div>
+
+    <!-- Reset -->
+    <div style="padding-top:.5rem;border-top:1px solid var(--border)">
+      <button id="reset-btn" style="font-size:.75rem;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--sans)">Reset all data</button>
+    </div>`;
+
+  // Dark mode toggle in panel
+  document.getElementById('dark-toggle').addEventListener('change', e => {
+    const p2 = getProfile(); p2.darkMode = e.target.checked; saveProfile(p2); applyTheme(p2.darkMode);
+  });
+
+  // Level selector
+  document.querySelectorAll('.level-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p2 = getProfile(); p2.targetLevel = btn.dataset.level; saveProfile(p2);
+      document.querySelectorAll('.level-opt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Topic chips — cycle liked → disliked → neutral
+  document.querySelectorAll('.topic-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p2 = getProfile(); const t = btn.dataset.topic;
+      const w = p2.topicWeights[t] || 1;
+      if (w >= 1.3) { p2.topicWeights[t] = 0.4; btn.className='topic-chip disliked'; }
+      else if (w <= 0.6) { p2.topicWeights[t] = 1; btn.className='topic-chip'; }
+      else { p2.topicWeights[t] = 1.8; btn.className='topic-chip liked'; }
+      saveProfile(p2);
+    });
+  });
+
+  // Delete word
+  document.querySelectorAll('.word-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p2 = getProfile();
+      p2.savedWords = p2.savedWords.filter(w => w.word !== btn.dataset.word);
+      saveProfile(p2); renderPanel();
+    });
+  });
+
+  // Reset
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    if (confirm('Reset all reading history, saved words and preferences?')) {
+      localStorage.removeItem('nl_profile');
+      closePanel(); render();
+    }
+  });
+}
+
+// ════════════════════════════════════════════
+// FILTERS
+// ════════════════════════════════════════════
 document.querySelectorAll('.pill').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll(`.pill[data-f="${btn.dataset.f}"]`).forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll(`.pill[data-f="${btn.dataset.f}"]`).forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     F[btn.dataset.f] = btn.dataset.v;
     render();
   });
 });
-document.getElementById('search').addEventListener('input', e => { Q=e.target.value.trim(); render(); });
+document.getElementById('search').addEventListener('input', e => { Q = e.target.value.trim(); render(); });
 
+let _rt;
+window.addEventListener('resize', () => { clearTimeout(_rt); _rt = setTimeout(render, 200); });
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
 loadAll();
-setInterval(loadAll, 15*60*1000);
-let _rt; window.addEventListener('resize', () => { clearTimeout(_rt); _rt = setTimeout(render, 200); });
+setInterval(loadAll, 15 * 60 * 1000);
 </script>
 </body>
 </html>

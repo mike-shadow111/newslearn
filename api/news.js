@@ -5,19 +5,27 @@ const FEEDS = [
   { url: 'https://feeds.bbci.co.uk/news/rss.xml',                        source: 'BBC' },
   { url: 'https://feeds.bbci.co.uk/news/technology/rss.xml',             source: 'BBC' },
   { url: 'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',source: 'BBC' },
+  { url: 'https://feeds.bbci.co.uk/news/health/rss.xml',                 source: 'BBC' },
   { url: 'https://www.theguardian.com/world/rss',                        source: 'Guardian' },
   { url: 'https://www.theguardian.com/technology/rss',                   source: 'Guardian' },
+  { url: 'https://www.theguardian.com/science/rss',                      source: 'Guardian' },
   { url: 'https://www.theverge.com/rss/index.xml',                       source: 'The Verge' },
   { url: 'https://feeds.arstechnica.com/arstechnica/index',              source: 'Ars Technica' },
   { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',    source: 'NY Times' },
   { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',  source: 'NY Times' },
+  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Science.xml',     source: 'NY Times' },
 ];
+
+// Topics we de-prioritize (shown less, not hidden)
+const LOW_PRIORITY = /\b(war|terror|attack|murder|kill|shoot|bomb|conflict|militar|weapon|sanction|sanction|hostage|isis|hamas|missile|nuclear|troops)\b/i;
 
 function fetchUrl(url, redirects = 0) {
   if (redirects > 3) return Promise.reject(new Error('too many redirects'));
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http;
-    const req = client.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 Newslearn/1.0' } }, res => {
+    const req = client.get(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 Newslearn/1.0' }
+    }, res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         return fetchUrl(res.headers.location, redirects + 1).then(resolve).catch(reject);
       }
@@ -30,34 +38,42 @@ function fetchUrl(url, redirects = 0) {
   });
 }
 
-function stripHtml(s) {
+function decodeEntities(s) {
   return (s || '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<br\s*\/?>/gi, ' ')
-    .replace(/<\/p>/gi, ' ')
-    .replace(/<\/li>/gi, ' ')
-    .replace(/<[^>]+>/g, '')
     .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
-    .replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#\d+;/g,'')
-    .replace(/&[a-z]+;/g,' ')
-    .replace(/\s+/g,' ').trim();
+    .replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&nbsp;/g,' ')
+    .replace(/&#x2019;|&#8217;/g,"'").replace(/&#x2018;|&#8216;/g,"'")
+    .replace(/&#x201C;|&#8220;/g,'"').replace(/&#x201D;|&#8221;/g,'"')
+    .replace(/&#x2013;|&#8211;/g,'–').replace(/&#x2014;|&#8212;/g,'—')
+    .replace(/&#x2026;|&#8230;/g,'…').replace(/&#xA0;|&#160;/g,' ')
+    .replace(/&#[xX][0-9a-fA-F]+;/g,'').replace(/&#\d+;/g,'')
+    .replace(/&[a-zA-Z]+;/g,' ');
+}
+
+function stripHtml(s) {
+  return decodeEntities(
+    (s || '')
+      .replace(/<style[\s\S]*?<\/style>/gi,'')
+      .replace(/<script[\s\S]*?<\/script>/gi,'')
+      .replace(/<br\s*\/?>/gi,' ').replace(/<\/p>/gi,' ').replace(/<\/li>/gi,' ')
+      .replace(/<[^>]+>/g,'')
+  ).replace(/\s+/g,' ').trim();
 }
 
 function cleanDesc(raw) {
   let s = stripHtml(raw);
-  s = s.replace(/\b(Get our|Sign up (for|to)|Subscribe (to|for)|Click here|Read more|More from|Follow us)[^.!?]*[.!?]/gi, '');
-  s = s.replace(/https?:\/\/\S+/g, '');
-  s = s.replace(/^\d{1,2}\s+\w+\s*/, '');
-  return s.replace(/\s+/g,' ').trim().slice(0, 300);
+  // Remove promo sentences
+  s = s.replace(/(Sign up|Subscribe|Get our|Click here|Read more|More from|Follow us|Newsletter)[^.!?\n]{0,200}[.!?]?/gi,'');
+  s = s.replace(/https?:\/\/\S+/g,'');
+  s = s.replace(/^\d{1,2}\s+\w+\s*/,'');
+  return s.replace(/\s+/g,' ').trim().slice(0, 280);
 }
 
 function extractItems(xml) {
-  xml = xml.replace(/<image[\s\S]*?<\/image>/gi, '');
-  xml = xml.replace(/<textInput[\s\S]*?<\/textInput>/gi, '');
+  xml = xml.replace(/<image[\s\S]*?<\/image>/gi,'');
+  xml = xml.replace(/<textInput[\s\S]*?<\/textInput>/gi,'');
   return xml.match(/<item[\s\S]*?<\/item>/g)
-      || xml.match(/<entry[\s\S]*?<\/entry>/g)
-      || [];
+      || xml.match(/<entry[\s\S]*?<\/entry>/g) || [];
 }
 
 function parseXml(xml, source) {
@@ -73,7 +89,6 @@ function parseXml(xml, source) {
       const m = block.match(new RegExp(`<${tag}[^>]*\\s${attr}="([^"]*)"`, 'i'));
       return m ? m[1] : '';
     };
-
     const title = stripHtml(get('title'));
     const link  = get('link') || getAttr('link', 'href');
     const desc  = cleanDesc(get('description') || get('summary') || get('content'));
@@ -91,16 +106,15 @@ function parseXml(xml, source) {
   return items;
 }
 
-const HARD = new Set(['pursuant','thereof','notwithstanding','aforementioned','escalate',
-  'infrastructure','incumbent','sovereignty','diplomatic','coalition','referendum',
-  'sanctions','austerity','monetary','fiscal','semiconductor','algorithm','cybersecurity',
-  'surveillance','autonomous','pandemic','mortality','epidemiological','pharmaceutical',
-  'unprecedented','catastrophic','trajectory','implications','comprehensive','sustainable',
-  'deteriorate','substantially','fundamentally','retaliation','provocative','authoritarian',
-  'geopolitical','bilateral','multilateral','embargo','tariff','inflation','recession',
-  'diversification','speculation','volatility','proliferation','cryptocurrency','litigation',
-  'arbitration','constitutional','bureaucratic','parliamentary','legislative','negotiations',
-  'administration','deployment','implementation','authorization']);
+const HARD = new Set(['pursuant','notwithstanding','aforementioned','sovereignty','diplomatic',
+  'coalition','referendum','sanctions','austerity','monetary','fiscal','semiconductor',
+  'algorithm','cybersecurity','surveillance','autonomous','pandemic','mortality',
+  'epidemiological','pharmaceutical','unprecedented','catastrophic','trajectory',
+  'implications','comprehensive','sustainable','deteriorate','substantially',
+  'retaliation','provocative','authoritarian','geopolitical','bilateral','multilateral',
+  'embargo','tariff','inflation','recession','diversification','speculation','volatility',
+  'proliferation','cryptocurrency','litigation','arbitration','constitutional',
+  'bureaucratic','parliamentary','legislative','negotiations','implementation']);
 
 const MEDIUM = new Set(['government','minister','parliament','policy','regulation','legislation',
   'economy','industry','company','profit','revenue','investment','market','climate',
@@ -125,31 +139,25 @@ function estimateLevel(text) {
 
 function guessTopic(t, d) {
   const s = ((t||'')+(d||'')).toLowerCase();
-  if (/\b(ai|tech|software|apple|google|microsoft|robot|cyber|chip|iphone|android|startup|openai|nvidia|meta)\b/.test(s)) return 'technology';
-  if (/\b(space|nasa|climate|planet|science|biolog|physics|chemist|asteroid|quantum|genome|species|fossil)\b/.test(s)) return 'science';
-  if (/\b(health|cancer|virus|hospital|doctor|mental|fitness|obesity|drug|vaccine|disease|treatment|covid|ebola|outbreak)\b/.test(s)) return 'health';
-  if (/\b(market|economy|stock|inflation|bank|trade|invest|gdp|recession|revenue|profit|crypto|bitcoin|tariff)\b/.test(s)) return 'business';
+  if (/\b(ai|tech|software|apple|google|microsoft|robot|cyber|chip|iphone|android|startup|openai|nvidia|meta|app)\b/.test(s)) return 'technology';
+  if (/\b(space|nasa|climate|planet|science|biolog|physics|chemist|asteroid|quantum|genome|species|fossil|discover)\b/.test(s)) return 'science';
+  if (/\b(health|cancer|virus|hospital|doctor|mental|fitness|obesity|drug|vaccine|disease|treatment|covid|outbreak|diet|exercise)\b/.test(s)) return 'health';
+  if (/\b(market|economy|stock|inflation|bank|trade|invest|gdp|recession|revenue|profit|crypto|bitcoin|tariff|startup)\b/.test(s)) return 'business';
+  if (/\b(sport|football|soccer|tennis|basketball|olympic|athlete|match|tournament|league|championship|fifa|nba|nfl)\b/.test(s)) return 'sport';
+  if (/\b(film|movie|music|art|culture|fashion|design|book|novel|theater|exhibition|award|oscar|grammy|celebrity)\b/.test(s)) return 'culture';
   return 'world';
 }
 
-// Key phrase similarity for deduplication (handles "Putin says" vs "Putin rejects" same story)
 function titleKey(title) {
-  const stopwords = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','as','is','are','was','were','has','have','had','his','her','its','their','he','she','it','they','that','this','says','said','over','after','from','into','about','be','will','who','what','how','when','up','out','off','not','no']);
-  return title.toLowerCase()
-    .replace(/[^a-z0-9\s]/g,'')
-    .split(/\s+/)
-    .filter(w => w.length > 2 && !stopwords.has(w))
-    .slice(0, 6)
-    .sort()
-    .join('|');
+  const stop = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','as','is','are','was','were','has','have','had','his','her','its','their','he','she','it','they','that','this','says','said','over','after','from','into','about','be','will','who','what','how','when','up','out']);
+  return title.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/)
+    .filter(w => w.length > 2 && !stop.has(w)).slice(0,6).sort().join('|');
 }
 
 function wordOverlap(a, b) {
-  const ka = new Set(a.split('|'));
-  const kb = new Set(b.split('|'));
-  let common = 0;
-  ka.forEach(w => { if (kb.has(w)) common++; });
-  return common / Math.min(ka.size, kb.size);
+  const ka = new Set(a.split('|')), kb = new Set(b.split('|'));
+  let c = 0; ka.forEach(w => { if (kb.has(w)) c++; });
+  return c / Math.min(ka.size, kb.size);
 }
 
 module.exports = async (req, res) => {
@@ -170,17 +178,21 @@ module.exports = async (req, res) => {
       ...a,
       level: estimateLevel(a.title + ' ' + a.desc),
       topic: guessTopic(a.title, a.desc),
+      priority: LOW_PRIORITY.test(a.title + ' ' + a.desc) ? 0 : 1,
       _key: titleKey(a.title),
     }));
 
-  articles.sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Sort: high priority first, then by date
+  articles.sort((a, b) => {
+    if (b.priority !== a.priority) return b.priority - a.priority;
+    return new Date(b.date) - new Date(a.date);
+  });
 
-  // Deduplicate: exact title + near-duplicate story (>60% keyword overlap, same level)
+  // Deduplicate
   const kept = [];
   for (const a of articles) {
     const isDup = kept.some(k =>
-      k._key === a._key ||
-      (k.level === a.level && wordOverlap(k._key, a._key) > 0.6)
+      k._key === a._key || (k.level === a.level && wordOverlap(k._key, a._key) > 0.65)
     );
     if (!isDup) kept.push(a);
   }
