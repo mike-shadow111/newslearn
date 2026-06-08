@@ -133,55 +133,6 @@ module.exports = async (req, res) => {
 
     if (blocks.length < 2) return res.json({ ok: false, error: 'too few blocks' });
 
-        // Clean with Groq — remove only junk, keep original text
-        const groqKey = process.env.GROQ_API_KEY;
-        if (groqKey && blocks.length >= 2) {
-          try {
-            const numbered = blocks.map((b,i) => `[${i}] ${b.text}`).join('
-').slice(0, 7000);
-            const payload = JSON.stringify({
-              model: 'llama3-8b-8192',
-              messages: [{
-                role: 'system',
-                content: 'You receive numbered paragraphs from a news article. Remove ONLY these: author bylines ("By John Smith"), newsletter/subscription prompts, image captions and photo credits, social sharing prompts, cookie notices, isolated numbers or punctuation with no context. Do NOT summarize, rephrase, or cut any real article content. Return the kept paragraph numbers only, one per line, in format: [0], [1], [3] etc.'
-              },{
-                role: 'user',
-                content: numbered
-              }],
-              max_tokens: 500,
-              temperature: 0
-            });
-
-            const groqRes = await new Promise((resolve, reject) => {
-              const req2 = https.request({
-                hostname: 'api.groq.com',
-                path: '/openai/v1/chat/completions',
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${groqKey}`,
-                  'Content-Length': Buffer.byteLength(payload)
-                }
-              }, r => {
-                let d = ''; r.on('data', c => d += c); r.on('end', () => resolve(d));
-              });
-              req2.on('error', reject);
-              req2.setTimeout(12000, () => { req2.destroy(); reject(new Error('timeout')); });
-              req2.write(payload); req2.end();
-            });
-
-            const parsed = JSON.parse(groqRes);
-            const reply = parsed.choices?.[0]?.message?.content || '';
-            const kept = [...reply.matchAll(/\[(\d+)\]/g)].map(m => parseInt(m[1]));
-
-            // Only apply if Groq kept >50% — safety check against over-filtering
-            if (kept.length >= Math.ceil(blocks.length * 0.5)) {
-              const filtered = kept.filter(i => blocks[i]).map(i => blocks[i]);
-              return res.json({ ok: true, blocks: filtered });
-            }
-          } catch(e2) { /* Groq failed, use original */ }
-        }
-
         res.json({ ok: true, blocks });
   } catch(e) {
     res.json({ ok: false, error: e.message });
