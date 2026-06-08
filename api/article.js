@@ -108,7 +108,7 @@ function extractBody(html) {
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=600');
+  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=30');
 
   const { url } = req.query;
   if (!url || !url.startsWith('http'))
