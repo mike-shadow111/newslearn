@@ -847,21 +847,55 @@ function renderFallback(a) {
   attachWordHandlers();
 }
 
+let phraseSelectionBound = false;
+
 function attachWordHandlers() {
+  const reader = document.getElementById('r-body');
+  let hoverTimer;
+
   document.querySelectorAll('#r-body .w').forEach(el => {
-    el.addEventListener('click', e => { e.stopPropagation(); lookupWord(e, el.dataset.word); });
+    el.addEventListener('click', e => {
+      if (window.matchMedia('(hover: none)').matches) {
+        e.stopPropagation();
+        lookupWord(e, el.dataset.word);
+      }
+    });
+
+    el.addEventListener('mouseenter', e => {
+      if (window.matchMedia('(hover: hover)').matches) {
+        hoverTimer = setTimeout(() => {
+          lookupWord(e, el.dataset.word);
+        }, 400);
+      }
+    });
+
+    el.addEventListener('mouseleave', () => {
+      clearTimeout(hoverTimer);
+    });
   });
-  // Selection of phrases
-  document.getElementById('r-body').addEventListener('mouseup', e => {
-    const sel = window.getSelection();
-    const phrase = sel ? sel.toString().trim() : '';
-    if (phrase.length > 2 && phrase.length < 100 && phrase.includes(' ')) {
-      const range = sel.getRangeAt(0);
-      const rect  = range.getBoundingClientRect();
-      const fakeE = { clientX: rect.left + rect.width/2, clientY: rect.bottom };
-      lookupWord(fakeE, phrase.split(' ')[0], phrase);
-    }
-  });
+
+  if (!phraseSelectionBound) {
+    phraseSelectionBound = true;
+
+    reader.addEventListener('mouseup', e => {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+
+      const phrase = sel.toString().trim();
+
+      if (phrase.length > 2 && phrase.length < 120 && phrase.includes(' ')) {
+        const range = sel.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+
+        const fakeE = {
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.bottom
+        };
+
+        lookupWord(fakeE, phrase.split(/\s+/)[0], phrase);
+      }
+    });
+  }
 }
 
 function closeReader() {
