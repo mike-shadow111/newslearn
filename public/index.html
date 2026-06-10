@@ -449,7 +449,8 @@ header {
     <button class="pill" data-f="source" data-v="BBC">BBC</button>
     <button class="pill" data-f="source" data-v="Guardian">Guardian</button>
     <button class="pill" data-f="source" data-v="The Verge">Verge</button>
-    <button class="pill" data-f="source" data-v="NY Times">NYT</button>
+    <button class="pill" data-f="source" data-v="NPR">NPR</button>
+    <button class="pill" data-f="source" data-v="The Conversation">Conversation</button>
     <button class="pill" data-f="source" data-v="Ars Technica">Ars</button>
   </div>
 </div></div>
@@ -948,6 +949,8 @@ function closeReader() {
   document.getElementById('overlay').classList.remove('open');
   document.body.style.overflow = '';
   currentArticleIdx = null;
+  render(); // refresh cards to show updated progress bar
+}
   closePopup();
   render(); // refresh read indicators
 }
