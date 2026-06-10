@@ -1192,39 +1192,41 @@ function renderPanel() {
 // ════════════════════════════════════════════
 // FILTERS
 // ════════════════════════════════════════════
-document.querySelectorAll('.pill').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const f = btn.dataset.f;
-    const v = btn.dataset.v;
+// Use event delegation on fbar to avoid stale closures
+document.querySelector('.fbar').addEventListener('click', e => {
+  const btn = e.target.closest('.pill');
+  if (!btn) return;
+  const f = btn.dataset.f;
+  const v = btn.dataset.v;
 
-    if (f === 'level') {
-      if (v === 'all') {
-        // Clear all level selections
-        F.level.clear();
-        document.querySelectorAll('.pill[data-f="level"]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      } else {
-        // Toggle this level
-        document.querySelector('.pill[data-f="level"][data-v="all"]').classList.remove('active');
-        if (F.level.has(v)) {
-          F.level.delete(v);
-          btn.classList.remove('active');
-          // If nothing selected, revert to All
-          if (F.level.size === 0) {
-            document.querySelector('.pill[data-f="level"][data-v="all"]').classList.add('active');
-          }
-        } else {
-          F.level.add(v);
-          btn.classList.add('active');
-        }
-      }
-    } else {
-      document.querySelectorAll(`.pill[data-f="${f}"]`).forEach(b => b.classList.remove('active'));
+  if (f === 'level') {
+    if (v === 'all') {
+      F.level.clear();
+      document.querySelectorAll('.pill[data-f="level"]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      F[f] = v;
+    } else {
+      // Deactivate "All" pill
+      document.querySelector('.pill[data-f="level"][data-v="all"]').classList.remove('active');
+      if (F.level.has(v)) {
+        F.level.delete(v);
+        btn.classList.remove('active');
+        if (F.level.size === 0) {
+          // Nothing selected — reset to All
+          F.level.clear();
+          document.querySelectorAll('.pill[data-f="level"]').forEach(b => b.classList.remove('active'));
+          document.querySelector('.pill[data-f="level"][data-v="all"]').classList.add('active');
+        }
+      } else {
+        F.level.add(v);
+        btn.classList.add('active');
+      }
     }
-    render();
-  });
+  } else {
+    document.querySelectorAll(`.pill[data-f="${f}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    F[f] = v;
+  }
+  render();
 });
 document.getElementById('search').addEventListener('input', e => { Q = e.target.value.trim(); render(); });
 

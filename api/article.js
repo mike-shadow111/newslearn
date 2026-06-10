@@ -1,5 +1,5 @@
 const https = require('https');
-const http = require('http');
+const http  = require('http');
 
 function fetchUrl(url, redirects = 0, extraHeaders = {}) {
   if (redirects > 5) return Promise.reject(new Error('too many redirects'));
@@ -19,12 +19,24 @@ function fetchUrl(url, redirects = 0, extraHeaders = {}) {
           : new URL(res.headers.location, url).href;
         return fetchUrl(next, redirects + 1).then(resolve).catch(reject);
       }
+      // Treat paywalled responses (403/401/redirected to login) as failures
+      if (res.statusCode === 403 || res.statusCode === 401) {
+        return reject(new Error('blocked ' + res.statusCode));
+      }
       let data = ''; res.setEncoding('utf8');
       res.on('data', chunk => data += chunk);
       res.on('end', () => resolve(data));
     });
     req.on('error', reject);
     req.setTimeout(12000, () => { req.destroy(); reject(new Error('timeout')); });
+  });
+}
+
+function fetchJina(url) {
+  return fetchUrl('https://r.jina.ai/' + url, 0, {
+    'Accept': 'text/plain',
+    'X-Return-Format': 'text',
+    'X-Timeout': '10',
   });
 }
 
@@ -42,40 +54,46 @@ function decodeEntities(s) {
 
 function stripHtml(s) {
   let r = (s || '')
-    // Remove complete tags
     .replace(/<[^>]+>/g, ' ')
-    // Remove any leftover tag fragments like href="..." or broken attributes
     .replace(/\b(href|src|class|id|style|data-[a-z-]+)=["'][^"']*["']/gi, ' ')
-    // Remove bare URLs that leaked through
     .replace(/https?:\/\/[^\s<>"']+/g, ' ')
-    // Remove HTML attribute fragments
     .replace(/[a-z-]+=["'][^"']{0,200}["']/gi, ' ')
-    // Remove CMP and tracking params
     .replace(/[?&]?CMP=[^\s]*/g, ' ')
-    // Remove leftover > or < chars
     .replace(/[<>]/g, ' ');
   return decodeEntities(r).replace(/\s+/g, ' ').trim();
 }
 
+// Comprehensive junk patterns
 const JUNK_RE = [
-  /^(sign up|subscribe|get our|click here|read more|more from|follow us|newsletter)/i,
-  /^(share|save story|bookmark|print|listen|watch|audio|video|podcast)/i,
-  /^(advertisement|sponsored|promoted|partner content)/i,
-  /^(related[: ]|also read|see also|you may also|more on this|read next)/i,
-  /^(copyright|©|all rights reserved|terms of|privacy policy|cookie)/i,
+  /^(sign up|subscribe|get our|click here|read more|more from|follow us|newsletter|join our)/i,
+  /^(share|save story|bookmark|print|listen|watch|audio|video|podcast|email this)/i,
+  /^(advertisement|sponsored|promoted|partner content|paid post)/i,
+  /^(related[: ]|also read|see also|you may also|more on this|read next|trending|popular)/i,
+  /^(copyright|©|all rights reserved|terms of|privacy policy|cookie|do not sell)/i,
   /^(image[: ]|photo[: ]|caption[: ]|credit[: ]|picture[: ]|illustration[: ]|photograph)/i,
-  /^(tags[: ]|topics[: ]|section[: ]|filed under|keywords)/i,
-  /^(by |written by |reported by |edited by )/i,
-  /newsletter|unsubscribe|opt.?out|manage (your )?preferences/i,
-  /this (article|story) (was|is) (originally )?published/i,
+  /^(tags[: ]|topics[: ]|section[: ]|filed under|keywords|category)/i,
+  /^(by |written by |reported by |edited by |updated by )/i,
+  /^(comments?[: ]|\d+ comments?|leave a comment|join the discussion|have your say)/i,
+  /^(get the|download the|open the|use the).{0,30}app/i,
+  /^(follow|find us on|connect with us|check out our).{0,40}(twitter|facebook|instagram|tiktok|youtube|social)/i,
+  /newsletter|unsubscribe|opt.?out|manage (your )?preferences|email preferences/i,
+  /this (article|story|piece|report) (was|is) (originally )?published/i,
   /\bcomments?\b.*\d+|\bleave a comment\b|\bjoin the discussion\b/i,
   /^\s*[\d•·|–—]+\s*$/,
+  // NYT-specific boilerplate
+  /^(a version of this article|this article is part of|this is part of)/i,
+  /^(correction:|editor's note:|note:|clarification:)/i,
+  /to read (the full|this) (story|article)/i,
+  /\bpaywall\b|\bsubscription\b.*\bfull access\b/i,
+  // Verge / tech site boilerplate
+  /^(verge deals|the verge|the verge's|polygon|vox media)/i,
+  /\b(verge deals|affiliate commission|affiliate link)\b/i,
+  /^(all products|products featured|we may earn)/i,
 ];
 
 function isJunk(text, tag) {
-  if (!text || text.length < 30) return true;
+  if (!text || text.length < 25) return true;
   if (tag === 'figcaption' || tag === 'cite' || tag === 'time') return true;
-  // Short p-tags that look like bylines (e.g. "By John Smith")
   if (tag === 'p' && text.length < 80 && /^[A-Z][a-z]+ [A-Z][a-z]+/.test(text) && text.split(' ').length <= 4) return true;
   for (const re of JUNK_RE) if (re.test(text)) return true;
   return false;
@@ -98,24 +116,54 @@ function cleanHtml(html) {
     .replace(/<button[\s\S]*?<\/button>/gi,'')
     .replace(/<input[^>]*>/gi,'')
     .replace(/<svg[\s\S]*?<\/svg>/gi,'')
-    // Remove divs with junk class names
-    .replace(/<div[^>]*class="[^"]*(?:related|promo|newsletter|subscribe|signup|share|social|comment|tag|byline|author-bio|advertisement|ad-unit|sidebar|widget|recommendation|also-read|more-from)[^"]*"[^>]*>[\s\S]*?<\/div>/gi,'')
+    // Remove junk sections by class/id
+    .replace(/<[^>]*(?:class|id)="[^"]*(?:related|promo|newsletter|subscribe|signup|share|social|comment|tag|byline|author-bio|advertisement|ad-unit|sidebar|widget|recommendation|also-read|more-from|trending|popular|sponsored|read-more|story-footer|article-footer|inline-promo|most-popular|editor-picks|you-might|read-next)[^"]*"[^>]*>[\s\S]*?<\/(?:div|section|aside|ul|ol)>/gi,'')
     .replace(/<!--[\s\S]*?-->/g,'');
 }
 
 function extractBody(html) {
   const containers = [
+    // NYT specific
+    /<section[^>]*data-testid="[^"]*article-body[^"]*"[^>]*>([\s\S]*?)<\/section>/i,
+    /<div[^>]*class="[^"]*StoryBodyCompanionColumn[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
+    // Generic
     /<article[^>]*>([\s\S]*?)<\/article>/i,
     /<div[^>]*itemprop="articleBody"[^>]*>([\s\S]*?)<\/div>/i,
     /<section[^>]*(?:name|id)="articleBody"[^>]*>([\s\S]*?)<\/section>/i,
-    /<div[^>]*class="[^"]*(?:article-body|post-body|entry-content|article__body|article-content|story-body|page-content|article__content|post-content|content-body)[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
+    /<div[^>]*class="[^"]*(?:article-body|post-body|entry-content|article__body|article-content|story-body|page-content|article__content|post-content|content-body|body-content|article-text|post-text|prose|c-entry-content)[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
     /<main[^>]*>([\s\S]*?)<\/main>/i,
   ];
   for (const re of containers) {
     const m = html.match(re);
-    if (m && m[1] && m[1].length > 500) return m[1];
+    if (m && m[1] && m[1].length > 300) return m[1];
   }
   return null;
+}
+
+// Detect if page is a paywall / login wall
+function isPaywalled(html) {
+  if (!html || html.length < 1000) return true;
+  if (/<[a-z]/i.test(html) === false) return false; // plain text, not HTML — ok
+  const lower = html.toLowerCase();
+  // NYT, WaPo, Verge etc paywall indicators
+  if (/subscribe to continue|subscribe to read|subscribe for full access|create a free account to continue|log in to continue|sign in to continue/.test(lower)) return true;
+  if (/regwall|paywall|subscribe-wall|piano-id/.test(lower)) return true;
+  // Very short extracted content from a big HTML page = probably walled
+  return false;
+}
+
+function cleanJinaText(raw) {
+  return raw.split(/\n+/)
+    .map(l => l.trim())
+    .filter(l => {
+      if (l.length < 30) return false;
+      if (isJunk(l, 'p')) return false;
+      // Remove markdown-style link lines from Jina output
+      if (/^\[.*\]\(https?:/.test(l)) return false;
+      // Remove lines that are just a URL
+      if (/^https?:\/\/\S+$/.test(l)) return false;
+      return true;
+    });
 }
 
 module.exports = async (req, res) => {
@@ -127,32 +175,53 @@ module.exports = async (req, res) => {
     return res.status(400).json({ ok: false, error: 'invalid url' });
 
   try {
-    // Try direct fetch first, fall back to Jina.ai reader if blocked
-    let raw = await fetchUrl(url).catch(() => null);
+    let raw = null;
     let useJina = false;
 
-    // If blocked (too short or no HTML structure) use Jina
-    if (!raw || raw.length < 500 || !/<[a-z]/i.test(raw)) {
-      raw = await fetchUrl('https://r.jina.ai/' + url, 0, {
-        'Accept': 'text/plain',
-        'X-Return-Format': 'text',
-      });
-      useJina = true;
+    // Try direct fetch
+    try {
+      raw = await fetchUrl(url);
+    } catch(e) {
+      raw = null;
     }
 
-    // If Jina returned plain text, convert to blocks directly
-    if (useJina && raw && raw.length > 200) {
-      const lines = raw.split(/\n+/).map(l => l.trim())
-        .filter(l => l.length > 40 && !isJunk(l, 'p'));
+    // Decide if we need Jina: blocked, too short, or paywalled
+    if (!raw || raw.length < 500 || isPaywalled(raw)) {
+      try {
+        const jinaRaw = await fetchJina(url);
+        // Prefer Jina if it returned more content
+        if (jinaRaw && jinaRaw.length > (raw ? raw.length * 0.5 : 0)) {
+          raw = jinaRaw;
+          useJina = true;
+        }
+      } catch(e) { /* keep raw if we have it */ }
+    }
+
+    if (!raw) return res.json({ ok: false, error: 'could not fetch' });
+
+    // Process Jina plain-text result
+    if (useJina) {
+      const lines = cleanJinaText(raw);
       if (lines.length >= 2) {
-        const blocks = lines.map(text => ({ tag: 'p', text }));
-        return res.json({ ok: true, blocks });
+        return res.json({ ok: true, blocks: lines.map(text => ({ tag: 'p', text })) });
       }
     }
 
-    const html  = cleanHtml(raw || '');
+    const html  = cleanHtml(raw);
     const body  = extractBody(html);
-    if (!body) return res.json({ ok: false, error: 'could not extract' });
+
+    // If no body extracted but direct fetch worked and page seems accessible,
+    // try Jina as fallback extraction method
+    if (!body) {
+      try {
+        const jinaRaw = await fetchJina(url);
+        const lines = cleanJinaText(jinaRaw);
+        if (lines.length >= 2) {
+          return res.json({ ok: true, blocks: lines.map(text => ({ tag: 'p', text })) });
+        }
+      } catch(e) {}
+      return res.json({ ok: false, error: 'could not extract' });
+    }
 
     const blocks = [];
     const re = /<(h[1-4]|p|blockquote)[^>]*>([\s\S]*?)<\/\1>/gi;
@@ -165,22 +234,21 @@ module.exports = async (req, res) => {
       blocks.push({ tag, text });
     }
 
-    // Fallback: split plain text if too few <p> tags found
+    // Fallback to sentence splitting if too few blocks
     if (blocks.length < 2) {
       const plain = stripHtml(body).replace(/\s+/g,' ');
       const sentences = plain.match(/[^.!?]+[.!?]+/g) || [];
-      const chunks = [];
       let chunk = '';
       for (const s of sentences) {
         chunk += s;
-        if (chunk.length > 150) { chunks.push(chunk.trim()); chunk = ''; }
+        if (chunk.length > 150) { if (!isJunk(chunk.trim(),'p')) blocks.push({ tag:'p', text:chunk.trim() }); chunk = ''; }
       }
-      if (chunk.length > 40) chunks.push(chunk.trim());
-      chunks.filter(s => !isJunk(s,'p')).forEach(s => blocks.push({ tag:'p', text:s }));
+      if (chunk.length > 40 && !isJunk(chunk.trim(),'p')) blocks.push({ tag:'p', text:chunk.trim() });
     }
+
     if (blocks.length < 2) return res.json({ ok: false, error: 'too few blocks' });
 
-        res.json({ ok: true, blocks });
+    res.json({ ok: true, blocks });
   } catch(e) {
     res.json({ ok: false, error: e.message });
   }

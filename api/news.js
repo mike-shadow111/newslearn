@@ -11,13 +11,15 @@ const FEEDS = [
   { url: 'https://www.theguardian.com/science/rss',                      source: 'Guardian' },
   { url: 'https://www.theverge.com/rss/index.xml',                       source: 'The Verge' },
   { url: 'https://feeds.arstechnica.com/arstechnica/index',              source: 'Ars Technica' },
-  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',    source: 'NY Times' },
   { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',  source: 'NY Times' },
   { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Science.xml',     source: 'NY Times' },
+  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Health.xml',      source: 'NY Times' },
 ];
 
-// Topics we de-prioritize (shown less, not hidden)
-const LOW_PRIORITY = /\b(war|terror|attack|murder|kill|shoot|bomb|conflict|militar|weapon|sanction|sanction|hostage|isis|hamas|missile|nuclear|troops)\b/i;
+// Priority 0 = shown last. Priority 2 = boosted (educational/lifestyle).
+// Priority 1 = default.
+const LOW_PRIORITY  = /\b(war|terror|attack|murder|kill|shoot|bomb|conflict|militar|weapon|sanction|hostage|isis|hamas|missile|nuclear|troops|shooting|explosion|casualt|death toll|killed|wounded|massacre|genocide|riot|coup|invasion|siege|airstrike|drone strike|protest crackdown|arrest|detained|prison|lawsuit|indicted|charged with|verdict|sentenced|election fraud|impeach|scandal|corrupt|bribe|crisis|catastroph|devastat|disaster|earthquake|hurricane|flood|wildfire|pandemic|outbreak|epidemic|overdose|suicide|homicide|abuse|assault|rape|trafficking)\b/i;
+const HIGH_PRIORITY = /\b(discover|research|study finds|scientists|invention|how to|explain|history|space|animal|planet|ocean|forest|museum|book|language|culture|recipe|travel|art|music|learn|education|school|university|brain|psychology|habit|productivity|design|architecture|food|health tip|exercise|nature|wildlife|innovation|future|explore|curious|fascinating|surprising|ancient|record|milestone|breakthrough)\b/i;
 
 function fetchUrl(url, redirects = 0) {
   if (redirects > 3) return Promise.reject(new Error('too many redirects'));
@@ -62,7 +64,6 @@ function stripHtml(s) {
 
 function cleanDesc(raw) {
   let s = stripHtml(raw);
-  // Remove promo sentences
   s = s.replace(/(Sign up|Subscribe|Get our|Click here|Read more|More from|Follow us|Newsletter)[^.!?\n]{0,200}[.!?]?/gi,'');
   s = s.replace(/https?:\/\/\S+/g,'');
   s = s.replace(/^\d{1,2}\s+\w+\s*/,'');
@@ -149,9 +150,9 @@ function guessTopic(t, d) {
 }
 
 function titleKey(title) {
-  const stop = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','as','is','are','was','were','has','have','had','his','her','its','their','he','she','it','they','that','this','says','said','over','after','from','into','about','be','will','who','what','how','when','up','out']);
+  const stop = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','as','is','are','was','were','has','have','had','his','her','its','their','he','she','it','they','that','this','says','said','over','after','from','into','about','be','will','who','what','how','when','up','out','new','why','first','last','could','would','more','most','just']);
   return title.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/)
-    .filter(w => w.length > 2 && !stop.has(w)).slice(0,6).sort().join('|');
+    .filter(w => w.length > 2 && !stop.has(w)).slice(0,7).sort().join('|');
 }
 
 function wordOverlap(a, b) {
@@ -174,26 +175,36 @@ module.exports = async (req, res) => {
   let articles = results
     .filter(r => r.status === 'fulfilled')
     .flatMap(r => r.value)
-    .map(a => ({
-      ...a,
-      level: estimateLevel(a.title + ' ' + a.desc),
-      topic: guessTopic(a.title, a.desc),
-      priority: LOW_PRIORITY.test(a.title + ' ' + a.desc) ? 0 : 1,
-      _key: titleKey(a.title),
-    }));
+    .map(a => {
+      const text = a.title + ' ' + a.desc;
+      let priority = 1;
+      if (HIGH_PRIORITY.test(text)) priority = 2;
+      if (LOW_PRIORITY.test(text))  priority = 0;
+      return {
+        ...a,
+        level: estimateLevel(text),
+        topic: guessTopic(a.title, a.desc),
+        priority,
+        _key: titleKey(a.title),
+      };
+    });
 
-  // Sort: high priority first, then by date
+  // Sort: priority desc, then date desc
   articles.sort((a, b) => {
     if (b.priority !== a.priority) return b.priority - a.priority;
     return new Date(b.date) - new Date(a.date);
   });
 
-  // Deduplicate
+  // Deduplicate — stricter: lower overlap threshold + ignore priority for dedup
   const kept = [];
   for (const a of articles) {
-    const isDup = kept.some(k =>
-      k._key === a._key || (k.level === a.level && wordOverlap(k._key, a._key) > 0.65)
-    );
+    const isDup = kept.some(k => {
+      if (k._key === a._key) return true;
+      if (wordOverlap(k._key, a._key) > 0.55) return true;
+      // Same source + very similar title
+      if (k.source === a.source && wordOverlap(k._key, a._key) > 0.4) return true;
+      return false;
+    });
     if (!isDup) kept.push(a);
   }
 
