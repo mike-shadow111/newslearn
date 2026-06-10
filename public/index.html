@@ -949,10 +949,8 @@ function closeReader() {
   document.getElementById('overlay').classList.remove('open');
   document.body.style.overflow = '';
   currentArticleIdx = null;
-  render(); // refresh cards to show updated progress bar
-}
   closePopup();
-  render(); // refresh read indicators
+  render();
 }
 
 // Save article
