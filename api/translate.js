@@ -5,18 +5,26 @@ module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 's-maxage=86400'); // cache translations 24h
 
   const { q } = req.query;
-  if (!q || q.length > 200) return res.status(400).json({ ok: false });
+  if (!q || q.length > 500) return res.status(400).json({ ok: false });
+
+  // Support context: "phrase|||surrounding sentence"
+  const sepIdx = q.indexOf('|||');
+  const phrase  = sepIdx !== -1 ? q.slice(0, sepIdx).trim() : q.trim();
+  const context = sepIdx !== -1 ? q.slice(sepIdx + 3).trim() : '';
+
+  if (!phrase || phrase.length > 200) return res.status(400).json({ ok: false });
 
   const groqKey = process.env.GROQ_API_KEY;
   if (!groqKey) return res.json({ ok: false, error: 'no key' });
 
+  const prompt = context
+    ? `Translate the English word or phrase "${phrase}" to Russian. It appears in this sentence: "${context}". Reply with ONLY the Russian translation, nothing else.`
+    : `Translate this English word or phrase to Russian. Reply with ONLY the Russian translation, nothing else, no explanations, no punctuation at the end.\n\nEnglish: ${phrase}`;
+
   try {
     const body = JSON.stringify({
       model: 'llama3-8b-8192',
-      messages: [{
-        role: 'user',
-        content: `Translate this English word or phrase to Russian. Reply with ONLY the Russian translation, nothing else, no explanations, no punctuation at the end.\n\nEnglish: ${q}`
-      }],
+      messages: [{ role: 'user', content: prompt }],
       max_tokens: 60,
       temperature: 0
     });
@@ -52,7 +60,7 @@ module.exports = async (req, res) => {
     // Fallback to MyMemory
     try {
       const fbRes = await new Promise((resolve, reject) => {
-        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=en|ru`;
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(phrase)}&langpair=en|ru`;
         https.get(url, r => {
           let d = ''; r.on('data', c => d += c);
           r.on('end', () => resolve(d));

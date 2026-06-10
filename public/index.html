@@ -502,7 +502,7 @@ header {
 // STATE
 // ════════════════════════════════════════════
 let ALL = [], ARTICLES = [];
-let F = {level:'all', topic:'all', source:'all'}, Q = '';
+let F = {level:new Set(), topic:'all', source:'all'}, Q = '';
 let DICT = {}, popWord = null, currentArticleIdx = null;
 
 // ── localStorage helpers ──────────────────────────────────────────────────────
@@ -657,7 +657,7 @@ function markAsRead(url) {
 function filtered() {
   return ALL.filter(a => {
     if (isJunk(a)) return false;
-    if (F.level  !== 'all' && a.level  !== F.level)  return false;
+    if (F.level.size > 0 && !F.level.has(a.level)) return false;
     if (F.topic  !== 'all' && a.topic  !== F.topic)  return false;
     if (F.source !== 'all' && a.source !== F.source) return false;
     if (Q) {
@@ -673,7 +673,7 @@ function render() {
   let list = filtered();
 
   // Apply recommendation sort when no manual filters active
-  if (F.level === 'all' && F.topic === 'all' && F.source === 'all' && !Q) {
+  if (F.level.size === 0 && F.topic === 'all' && F.source === 'all' && !Q) {
     list = sortByRecommendation(list);
     // Show recommendation banner
     const topTopic = Object.entries(profile.topicWeights)
@@ -847,22 +847,76 @@ function renderFallback(a) {
   attachWordHandlers();
 }
 
+// ── Selection-translate button ──────────────────────────────────────────────
+let _selBtn = null;
+function removeSelBtn() {
+  if (_selBtn) { _selBtn.remove(); _selBtn = null; }
+}
+
 function attachWordHandlers() {
   document.querySelectorAll('#r-body .w').forEach(el => {
-    el.addEventListener('click', e => { e.stopPropagation(); lookupWord(e, el.dataset.word); });
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      removeSelBtn();
+      const para = el.closest('p,blockquote');
+      const context = para ? para.textContent.trim() : '';
+      lookupWord(e, el.dataset.word, null, context);
+    });
   });
-  // Selection of phrases
-  document.getElementById('r-body').addEventListener('mouseup', e => {
-    const sel = window.getSelection();
-    const phrase = sel ? sel.toString().trim() : '';
-    if (phrase.length > 2 && phrase.length < 100 && phrase.includes(' ')) {
-      const range = sel.getRangeAt(0);
-      const rect  = range.getBoundingClientRect();
-      const fakeE = { clientX: rect.left + rect.width/2, clientY: rect.bottom };
-      lookupWord(fakeE, phrase.split(' ')[0], phrase);
-    }
+
+  const rbody = document.getElementById('r-body');
+  rbody.addEventListener('mouseup', () => setTimeout(handleSelection, 10));
+  rbody.addEventListener('touchend', () => setTimeout(handleSelection, 50));
+}
+
+function handleSelection() {
+  removeSelBtn();
+  const sel = window.getSelection();
+  const phrase = sel ? sel.toString().trim() : '';
+  if (phrase.length < 3 || phrase.length > 150) return;
+
+  const rbody = document.getElementById('r-body');
+  if (!sel.rangeCount) return;
+  const range = sel.getRangeAt(0);
+  const container = range.commonAncestorContainer;
+  if (!rbody.contains(container)) return;
+
+  const para = container.nodeType === 3
+    ? container.parentElement.closest('p,blockquote,h2,h3')
+    : container.closest('p,blockquote,h2,h3');
+  const context = para ? para.textContent.trim() : '';
+
+  const rect = range.getBoundingClientRect();
+  const btn = document.createElement('button');
+  btn.id = 'sel-translate-btn';
+  btn.textContent = '⬇ Translate';
+  btn.style.cssText = `
+    position:fixed;
+    left:${Math.min(rect.left + rect.width/2 - 55, window.innerWidth - 130)}px;
+    top:${rect.bottom + 6}px;
+    z-index:9999;
+    background:var(--accent);color:#fff;
+    border:none;border-radius:100px;
+    padding:5px 14px;font-size:.75rem;
+    font-family:var(--sans);font-weight:600;
+    cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.18);
+    white-space:nowrap;
+  `;
+  document.body.appendChild(btn);
+  _selBtn = btn;
+
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const fakeE = { clientX: rect.left + rect.width/2, clientY: rect.bottom };
+    removeSelBtn();
+    sel.removeAllRanges();
+    lookupWord(fakeE, phrase, null, context);
   });
 }
+
+document.addEventListener('mousedown', e => {
+  if (_selBtn && e.target !== _selBtn) removeSelBtn();
+});
 
 function closeReader() {
   document.getElementById('overlay').classList.remove('open');
@@ -903,8 +957,8 @@ document.getElementById('overlay').addEventListener('click', e => {
 // ════════════════════════════════════════════
 // WORD TRANSLATION
 // ════════════════════════════════════════════
-async function lookupWord(e, word, phrase) {
-  const key = phrase || word;
+async function lookupWord(e, word, _unused, context) {
+  const key = word;
   if (popWord === key) { closePopup(); return; }
   popWord = key;
 
@@ -918,23 +972,41 @@ async function lookupWord(e, word, phrase) {
   body.innerHTML = `<div class="wword">${h(key)}</div><div class="wphon" style="color:var(--muted)">Translating…</div>`;
   pop.classList.add('show');
 
-  if (DICT[key]) { showTranslation(key, DICT[key]); return; }
+  if (!context && DICT[key]) { showTranslation(key, DICT[key]); return; }
+
+  const isPhrase = key.includes(' ');
 
   try {
-    const res = await fetch(
-      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${encodeURIComponent(key)}`,
-      { headers: { 'Accept': 'application/json' } }
-    );
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    // Google Translate response: [[[translation, original, ...], ...], ...]
     let tr = '';
-    if (Array.isArray(data) && Array.isArray(data[0])) {
-      tr = data[0].filter(x => Array.isArray(x) && x[0]).map(x => x[0]).join('');
+
+    if (isPhrase || context) {
+      // Use /api/translate with context for better results
+      const q = context ? key + '|||' + context : key;
+      try {
+        const res = await fetch('/api/translate?q=' + encodeURIComponent(q));
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ok && data.translation) tr = data.translation;
+        }
+      } catch(e2) { /* fall through */ }
     }
+
+    if (!tr) {
+      const res = await fetch(
+        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${encodeURIComponent(key)}`,
+        { headers: { 'Accept': 'application/json' } }
+      );
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      if (Array.isArray(data) && Array.isArray(data[0])) {
+        tr = data[0].filter(x => Array.isArray(x) && x[0]).map(x => x[0]).join('');
+      }
+    }
+
     if (!tr || tr.toLowerCase().trim() === key.toLowerCase().trim()) throw new Error('no translation');
-    DICT[key] = { word: key, translation: tr };
-    showTranslation(key, DICT[key]);
+    const entry = { word: key, translation: tr };
+    if (!context) DICT[key] = entry;
+    showTranslation(key, entry);
   } catch(err) {
     console.error('translate error:', err);
     body.innerHTML = `<div class="wword">${h(key)}</div><div class="wphon" style="color:var(--muted)">Перевод не найден</div>`;
@@ -1122,9 +1194,35 @@ function renderPanel() {
 // ════════════════════════════════════════════
 document.querySelectorAll('.pill').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll(`.pill[data-f="${btn.dataset.f}"]`).forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    F[btn.dataset.f] = btn.dataset.v;
+    const f = btn.dataset.f;
+    const v = btn.dataset.v;
+
+    if (f === 'level') {
+      if (v === 'all') {
+        // Clear all level selections
+        F.level.clear();
+        document.querySelectorAll('.pill[data-f="level"]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      } else {
+        // Toggle this level
+        document.querySelector('.pill[data-f="level"][data-v="all"]').classList.remove('active');
+        if (F.level.has(v)) {
+          F.level.delete(v);
+          btn.classList.remove('active');
+          // If nothing selected, revert to All
+          if (F.level.size === 0) {
+            document.querySelector('.pill[data-f="level"][data-v="all"]').classList.add('active');
+          }
+        } else {
+          F.level.add(v);
+          btn.classList.add('active');
+        }
+      }
+    } else {
+      document.querySelectorAll(`.pill[data-f="${f}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      F[f] = v;
+    }
     render();
   });
 });
