@@ -587,6 +587,7 @@ function getProfile() {
     darkMode:     false,
     targetLevel:  'b1',
     topicWeights: { technology:1, science:1, health:1.2, business:1, sport:1.2, culture:1.2, world:0.8 },
+    sourceWeights: {},
     readArticles: [],   // array of urls
     savedArticles:[],   // array of urls
     savedWords:   [],   // [{word, translation}]
@@ -668,47 +669,142 @@ function colCount() {
 // ════════════════════════════════════════════
 // RECOMMENDATION ENGINE
 // ════════════════════════════════════════════
-function scoreArticle(a, profile) {
+// ════════════════════════════════════════════
+// RECOMMENDATION ENGINE v2 — YouTube-style
+// ════════════════════════════════════════════
+
+// Extract meaningful keywords from title (for entity matching)
+function extractEntities(title) {
+  const stop = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with',
+    'by','as','is','are','was','were','has','have','had','will','be','this','that','it',
+    'its','says','said','new','over','after','from','into','about','up','how','why','what',
+    'who','when','could','would','more','most','just','not','no','also']);
+  return title.toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 3 && !stop.has(w));
+}
+
+// Cosine-ish overlap between two keyword arrays
+function entityOverlap(aWords, bWords) {
+  if (!aWords.length || !bWords.length) return 0;
+  const bSet = new Set(bWords);
+  const hits = aWords.filter(w => bSet.has(w)).length;
+  return hits / Math.sqrt(aWords.length * bWords.length);
+}
+
+// Apply time-decay to weights — pull everything toward 1.0 slowly
+function decayWeights(weights, daysSince) {
+  const decayed = {};
+  const factor = Math.pow(0.97, daysSince); // ~3% decay per day
+  for (const [k, v] of Object.entries(weights)) {
+    if (k.startsWith('_')) { decayed[k] = v; continue; }
+    decayed[k] = 1 + (v - 1) * factor; // decay toward 1
+  }
+  return decayed;
+}
+
+function scoreArticle(a, p, recentEntities, sourceCount) {
   let score = 0;
-  // Topic weight from profile
-  score += (profile.topicWeights[a.topic] || 1) * 10;
-  // Prefer target level and one below
+
+  // 1. Topic affinity (learned)
+  score += (p.topicWeights[a.topic] || 1) * 12;
+
+  // 2. Source affinity
+  score += (p.sourceWeights?.[a.source] || 1) * 8;
+
+  // 3. Entity/keyword match with recently read articles
+  if (recentEntities.length) {
+    const aWords = extractEntities(a.title + ' ' + (a.desc || ''));
+    const overlap = entityOverlap(recentEntities, aWords);
+    score += overlap * 25; // strong signal — same topic/country/person
+  }
+
+  // 4. Level fit
   const levels = ['a2','b1','b2'];
-  const tIdx = levels.indexOf(profile.targetLevel);
+  const tIdx = levels.indexOf(p.targetLevel);
   const aIdx = levels.indexOf(a.level);
-  if (aIdx === tIdx) score += 5;
-  else if (aIdx === tIdx - 1) score += 3; // slightly easier = good warmup
-  else if (aIdx === tIdx + 1) score += 2; // slightly harder = stretch
-  // Penalize already read
-  if (profile.readArticles.includes(a.url)) score -= 20;
-  // Server-side priority (low = violence/terrorism)
-  score += (a.priority || 1) * 3;
-  // Freshness bonus
-  const age = (Date.now() - new Date(a.date)) / 3600000; // hours
-  score += Math.max(0, 5 - age * 0.1);
+  if (aIdx === tIdx)     score += 6;
+  else if (aIdx === tIdx - 1) score += 3;
+  else if (aIdx === tIdx + 1) score += 2;
+  else score -= 4; // two levels off
+
+  // 5. Already read — heavy penalty
+  if (p.readArticles.includes(a.url)) score -= 50;
+
+  // 6. Server priority (violence/politics = 0, educational = 2)
+  score += (a.priority ?? 1) * 4;
+
+  // 7. Freshness (up to +6 for <1h, fades over 48h)
+  const ageH = (Date.now() - new Date(a.date)) / 3600000;
+  score += Math.max(0, 6 - ageH * 0.12);
+
+  // 8. Source diversity — penalize if this source already has many in top results
+  const srcCount = sourceCount[a.source] || 0;
+  if (srcCount >= 3) score -= (srcCount - 2) * 5;
+
   return score;
 }
 
 function sortByRecommendation(list) {
-  const profile = getProfile();
-  return [...list].sort((a, b) => scoreArticle(b, profile) - scoreArticle(a, profile));
+  const p = getProfile();
+
+  // Apply time-decay since last visit
+  const now = Date.now();
+  const lastDecay = p._lastDecay || now;
+  const daysSince = (now - lastDecay) / 86400000;
+  if (daysSince > 0.5) { // decay at most twice a day
+    p.topicWeights  = decayWeights(p.topicWeights || {}, daysSince);
+    p.sourceWeights = decayWeights(p.sourceWeights || {}, daysSince);
+    p._lastDecay = now;
+    saveProfile(p);
+  }
+
+  // Build entity pool from last 8 read articles
+  const recentUrls = (p.readArticles || []).slice(0, 8);
+  const recentEntities = [];
+  for (const url of recentUrls) {
+    const art = ALL.find(a => a.url === url);
+    if (art) recentEntities.push(...extractEntities(art.title + ' ' + (art.desc || '')));
+  }
+
+  // Score all articles
+  const scored = list.map(a => ({ a, s: scoreArticle(a, p, recentEntities, {}) }));
+  scored.sort((x, y) => y.s - x.s);
+
+  // Re-score with diversity constraint (pass 2)
+  const sourceCount = {};
+  return scored.map(({ a }) => {
+    sourceCount[a.source] = (sourceCount[a.source] || 0) + 1;
+    return a;
+  });
 }
 
-function recordInterest(topic, level) {
+// Called when user opens an article — update all signals
+function recordInterest(topic, level, source, title, desc, readDepth) {
   const p = getProfile();
-  if (!p.topicWeights[topic]) p.topicWeights[topic] = 1;
-  p.topicWeights[topic] = Math.min(3, p.topicWeights[topic] * 1.15);
+  if (!p.sourceWeights) p.sourceWeights = {};
+
+  // Topic weight — stronger signal if deep read
+  const topicBoost = readDepth > 0.5 ? 1.25 : 1.12;
+  p.topicWeights[topic] = Math.min(4, (p.topicWeights[topic] || 1) * topicBoost);
+
+  // Source weight
+  const srcBoost = readDepth > 0.5 ? 1.2 : 1.08;
+  p.sourceWeights[source] = Math.min(4, (p.sourceWeights[source] || 1) * srcBoost);
+
   // Gradually upgrade target level
   const levels = ['a2','b1','b2'];
   const tIdx = levels.indexOf(p.targetLevel);
   const aIdx = levels.indexOf(level);
   if (aIdx > tIdx) {
-    p.topicWeights['_levelProgress'] = (p.topicWeights['_levelProgress'] || 0) + 1;
-    if (p.topicWeights['_levelProgress'] >= 5) {
+    p._levelProgress = (p._levelProgress || 0) + (readDepth > 0.5 ? 2 : 1);
+    if (p._levelProgress >= 6) {
       p.targetLevel = levels[Math.min(tIdx + 1, 2)];
-      p.topicWeights['_levelProgress'] = 0;
+      p._levelProgress = 0;
     }
   }
+
   saveProfile(p);
 }
 
@@ -745,14 +841,27 @@ function render() {
   // Apply recommendation sort when no manual filters active
   if (F.level.size === 0 && F.topic === 'all' && F.source === 'all' && !Q) {
     list = sortByRecommendation(list);
-    // Show recommendation banner
-    const topTopic = Object.entries(profile.topicWeights)
-      .filter(([k]) => !k.startsWith('_'))
+    // Show recommendation banner with smart insight
+    const p2 = getProfile();
+    const topTopic = Object.entries(p2.topicWeights || {})
+      .filter(([k]) => !k.startsWith('_') && typeof p2.topicWeights[k] === 'number')
       .sort((a,b) => b[1]-a[1])[0];
-    if (topTopic && topTopic[1] > 1.2) {
+    const topSource = Object.entries(p2.sourceWeights || {})
+      .sort((a,b) => b[1]-a[1])[0];
+    const lowSource = Object.entries(p2.sourceWeights || {})
+      .filter(([,v]) => v < 0.8).sort((a,b) => a[1]-b[1])[0];
+
+    let bannerText = '';
+    if (topTopic && topTopic[1] > 1.3) {
+      bannerText = `Showing more ${topTopic[0]}`;
+      if (topSource && topSource[1] > 1.2) bannerText += ` · Favouring ${topSource[0]}`;
+      if (lowSource) bannerText += ` · Less ${lowSource[0]}`;
+    }
+    if (bannerText) {
       document.getElementById('rec-banner').style.display = 'flex';
-      document.getElementById('rec-text').textContent =
-        `Personalized for you · More ${topTopic[0]} based on your reading`;
+      document.getElementById('rec-text').textContent = bannerText;
+    } else {
+      document.getElementById('rec-banner').style.display = 'none';
     }
   } else {
     document.getElementById('rec-banner').style.display = 'none';
@@ -843,7 +952,8 @@ async function openReader(idx) {
 
   // Track reading
   markAsRead(a.url);
-  recordInterest(a.topic, a.level);
+  const _readDepth = (LS.get('progress') || {})[a.url] / 100 || 0;
+  recordInterest(a.topic, a.level, a.source, a.title, a.desc || '', _readDepth);
 
   // Scroll progress — stored in separate LS key to avoid profile conflicts
   const overlay = document.getElementById('overlay');
@@ -1026,6 +1136,20 @@ document.addEventListener('mousedown', e => {
 function closeReader() {
   document.getElementById('overlay').classList.remove('open');
   document.body.style.overflow = '';
+  // Negative signal: if user barely read (<5%), slightly down-weight source/topic
+  if (currentArticleIdx !== null) {
+    const a = ARTICLES[currentArticleIdx];
+    if (a) {
+      const depth = (LS.get('progress') || {})[a.url] / 100 || 0;
+      if (depth < 0.05) {
+        const p = getProfile();
+        if (!p.sourceWeights) p.sourceWeights = {};
+        p.topicWeights[a.topic]   = Math.max(0.3, (p.topicWeights[a.topic]   || 1) * 0.93);
+        p.sourceWeights[a.source] = Math.max(0.3, (p.sourceWeights[a.source] || 1) * 0.93);
+        saveProfile(p);
+      }
+    }
+  }
   currentArticleIdx = null;
   closePopup();
   render();
