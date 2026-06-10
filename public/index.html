@@ -278,103 +278,215 @@ header {
 .wsave:hover { text-decoration: underline; }
 
 /* ════════════════════════════════════════════
-   PROFILE PANEL
+   PROFILE PANEL — tactile / material feel
    ════════════════════════════════════════════ */
 .panel-overlay {
   display: none; position: fixed; inset: 0; z-index: 55;
-  background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
+  background: rgba(0,0,0,.5);
 }
 .panel-overlay.open { display: block; animation: fadein .18s ease; }
 @keyframes fadein { from{opacity:0} to{opacity:1} }
 
 .panel {
   position: fixed; right: 0; top: 0; bottom: 0; z-index: 56;
-  width: min(380px, 100vw); background: var(--surface);
-  border-left: 1px solid var(--border);
+  width: min(390px, 100vw);
+  background: #f2ede4;
+  border-left: 2px solid #c9bfae;
+  box-shadow: -6px 0 32px rgba(0,0,0,.18);
   display: flex; flex-direction: column;
-  animation: slidein .2s ease;
+  animation: slidein .22s cubic-bezier(.22,.68,0,1.1);
   font-family: var(--sans);
+}
+[data-theme="dark"] .panel {
+  background: #1e1e19;
+  border-left-color: #3a372e;
+  box-shadow: -6px 0 32px rgba(0,0,0,.5);
 }
 @keyframes slidein { from{transform:translateX(100%)} to{transform:none} }
 
 .panel-head {
-  padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+  padding: 1.1rem 1.4rem;
+  background: #e8e0d0;
+  border-bottom: 2px solid #c9bfae;
   display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 6px rgba(0,0,0,.07);
 }
-.panel-head h2 { font-family: var(--serif); font-size: 1.2rem; }
-.panel-close { background: none; border: none; font-size: 1.1rem; color: var(--muted); cursor: pointer; padding: 4px; }
-
-.panel-body { flex: 1; overflow-y: auto; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
-
-/* Profile stats */
-.profile-stats {
-  display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem;
+[data-theme="dark"] .panel-head {
+  background: #252520;
+  border-bottom-color: #3a372e;
 }
+.panel-head h2 {
+  font-family: var(--serif); font-size: 1.15rem;
+  color: var(--text); letter-spacing: -.01em;
+}
+.panel-close {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: #d8d0c0; border: 1px solid #bfb5a0;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.5);
+  color: var(--muted); cursor: pointer;
+  font-size: .9rem; display: flex; align-items: center; justify-content: center;
+  transition: all .1s;
+}
+.panel-close:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.15); transform: translateY(1px); }
+[data-theme="dark"] .panel-close { background: #2e2e28; border-color: #4a4740; }
+
+.panel-body {
+  flex: 1; overflow-y: auto; padding: 1.25rem 1.4rem;
+  display: flex; flex-direction: column; gap: 1.4rem;
+}
+
+/* ── Section label ── */
+.panel-section-label {
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: #8a7e6e; margin-bottom: .6rem;
+}
+[data-theme="dark"] .panel-section-label { color: #6a6458; }
+
+/* ── Stats — inset "pressed" cells ── */
+.profile-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; }
 .pstat {
-  background: var(--bg); border-radius: 10px; padding: .75rem;
-  text-align: center; border: 1px solid var(--border);
+  background: #e0d9cc;
+  border-radius: 10px; padding: .7rem .5rem;
+  text-align: center;
+  border: 1px solid #c4b9a8;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.6);
 }
-.pstat-n { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; color: var(--accent); }
-.pstat-l { font-size: .68rem; color: var(--muted); margin-top: .1rem; }
+[data-theme="dark"] .pstat {
+  background: #252520; border-color: #3a372e;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.3), 0 1px 0 rgba(255,255,255,.04);
+}
+.pstat-n { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; color: var(--accent); line-height: 1; }
+.pstat-l { font-size: .63rem; color: #8a7e6e; margin-top: .25rem; }
+[data-theme="dark"] .pstat-l { color: #6a6458; }
 
-/* Streak */
-.streak-row { display: flex; align-items: center; gap: .75rem; background: var(--bg); border-radius: 10px; padding: .75rem 1rem; border: 1px solid var(--border); }
-.streak-n { font-family: var(--serif); font-size: 1.4rem; font-weight: 600; color: var(--accent); }
-.streak-l { font-size: .78rem; color: var(--muted); }
+/* ── Streak — raised badge ── */
+.streak-row {
+  display: flex; align-items: center; gap: .8rem;
+  background: #e8e0d0;
+  border-radius: 12px; padding: .8rem 1rem;
+  border: 1px solid #c9bfae;
+  box-shadow: 0 2px 0 #bfb5a0, 0 3px 8px rgba(0,0,0,.08);
+}
+[data-theme="dark"] .streak-row {
+  background: #252520; border-color: #3a372e;
+  box-shadow: 0 2px 0 #1a1a16, 0 3px 8px rgba(0,0,0,.3);
+}
+.streak-n { font-family: var(--serif); font-size: 1.4rem; font-weight: 600; color: var(--accent); line-height: 1; }
+.streak-l { font-size: .75rem; color: #8a7e6e; margin-top: .15rem; }
+[data-theme="dark"] .streak-l { color: #6a6458; }
 
-/* Settings */
+/* ── Settings block — like a form on paper ── */
+.settings-block {
+  background: #ede7db;
+  border-radius: 12px;
+  border: 1px solid #c9bfae;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  overflow: hidden;
+}
+[data-theme="dark"] .settings-block {
+  background: #222219; border-color: #3a372e;
+}
 .setting-row {
   display: flex; align-items: center; justify-content: space-between;
-  padding: .65rem 0; border-bottom: 1px solid var(--border);
+  padding: .75rem 1rem;
+  border-bottom: 1px solid #d8d0c0;
 }
 .setting-row:last-child { border-bottom: none; }
-.setting-label { font-size: .85rem; color: var(--text); }
-.setting-sub   { font-size: .72rem; color: var(--muted); margin-top: .1rem; }
+[data-theme="dark"] .setting-row { border-bottom-color: #2e2e28; }
+.setting-label { font-size: .84rem; color: var(--text); font-weight: 500; }
+.setting-sub   { font-size: .7rem; color: #8a7e6e; margin-top: .15rem; }
+[data-theme="dark"] .setting-sub { color: #6a6458; }
 
-/* Toggle switch */
-.toggle { position: relative; width: 40px; height: 22px; }
+/* ── Toggle — physical switch feel ── */
+.toggle { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
 .toggle input { opacity: 0; width: 0; height: 0; }
 .toggle-track {
-  position: absolute; inset: 0; border-radius: 11px;
-  background: var(--border); cursor: pointer; transition: background .2s;
+  position: absolute; inset: 0; border-radius: 12px;
+  background: #c4b9a8;
+  border: 1px solid #b0a590;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.15);
+  cursor: pointer; transition: background .2s;
 }
-.toggle input:checked + .toggle-track { background: var(--accent); }
+.toggle input:checked + .toggle-track {
+  background: var(--accent);
+  border-color: #155a35;
+}
 .toggle-track::after {
   content: ''; position: absolute; top: 3px; left: 3px;
   width: 16px; height: 16px; border-radius: 50%;
-  background: #fff; transition: transform .2s;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1);
 }
 .toggle input:checked + .toggle-track::after { transform: translateX(18px); }
 
-/* Level selector */
-.level-select {
-  display: flex; gap: .4rem;
-}
+/* ── Level selector — raised buttons ── */
+.level-select { display: flex; gap: .4rem; }
 .level-opt {
-  padding: 3px 10px; border-radius: 100px;
-  border: 1px solid var(--border); background: transparent;
-  font-family: var(--sans); font-size: .74rem; color: var(--muted);
-  cursor: pointer; transition: all .12s;
+  padding: 4px 12px; border-radius: 8px;
+  border: 1px solid #c4b9a8;
+  background: #e8e0d0;
+  box-shadow: 0 2px 0 #bfb5a0;
+  font-family: var(--sans); font-size: .73rem; color: #7a6e5e;
+  cursor: pointer;
+  transition: all .1s;
 }
-.level-opt.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.level-opt:active { box-shadow: none; transform: translateY(2px); }
+.level-opt.active {
+  background: var(--accent); border-color: #155a35;
+  box-shadow: 0 2px 0 #0e3d22;
+  color: #fff;
+}
+[data-theme="dark"] .level-opt {
+  background: #2e2e28; border-color: #4a4740;
+  box-shadow: 0 2px 0 #1a1a16; color: #8a8478;
+}
+[data-theme="dark"] .level-opt.active {
+  background: var(--accent); box-shadow: 0 2px 0 #1a4028;
+}
 
-/* Topic interests */
-.topic-grid { display: flex; flex-wrap: wrap; gap: .4rem; }
+/* ── Topic chips — stamps ── */
+.topic-grid { display: flex; flex-wrap: wrap; gap: .45rem; }
 .topic-chip {
-  padding: 4px 12px; border-radius: 100px;
-  border: 1px solid var(--border); background: transparent;
-  font-family: var(--sans); font-size: .76rem; color: var(--muted);
-  cursor: pointer; transition: all .12s;
+  padding: 5px 12px; border-radius: 8px;
+  border: 1px solid #c4b9a8;
+  background: #e8e0d0;
+  box-shadow: 0 2px 0 #bfb5a0;
+  font-family: var(--sans); font-size: .75rem; color: #7a6e5e;
+  cursor: pointer;
+  transition: all .1s;
 }
-.topic-chip.liked { background: var(--accent2); border-color: var(--accent); color: var(--accent); }
-.topic-chip.disliked { opacity: .45; text-decoration: line-through; }
+.topic-chip:active { box-shadow: none; transform: translateY(2px); }
+.topic-chip.liked {
+  background: var(--accent2); border-color: var(--accent);
+  box-shadow: 0 2px 0 #1a5535;
+  color: var(--accent); font-weight: 600;
+}
+.topic-chip.disliked {
+  background: #ddd5c5; border-color: #b8ae9e;
+  box-shadow: 0 2px 0 #afa59a;
+  opacity: .5; text-decoration: line-through;
+}
+[data-theme="dark"] .topic-chip {
+  background: #2e2e28; border-color: #4a4740;
+  box-shadow: 0 2px 0 #1a1a16; color: #7a7468;
+}
+[data-theme="dark"] .topic-chip.liked {
+  background: var(--accent2); box-shadow: 0 2px 0 #1a3020;
+}
 
-/* Saved words list */
-.words-list { display: flex; flex-direction: column; gap: .5rem; }
+/* ── Saved words ── */
+.words-list { display: flex; flex-direction: column; gap: .45rem; }
 .word-item {
   display: flex; align-items: center; justify-content: space-between;
-  padding: .5rem .75rem; background: var(--bg); border-radius: 8px;
-  border: 1px solid var(--border); font-size: .82rem;
+  padding: .5rem .8rem;
+  background: #ede7db; border-radius: 8px;
+  border: 1px solid #c9bfae;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.06);
+  font-size: .82rem;
+}
+[data-theme="dark"] .word-item {
+  background: #252520; border-color: #3a372e;
 }
 .word-en  { font-family: var(--serif); color: var(--text); }
 .word-ru  { color: var(--accent); font-weight: 500; font-size: .78rem; }
@@ -708,7 +820,7 @@ function render() {
     const idx  = ARTICLES.indexOf(a);
     const desc = clean(a.desc||'');
     const read = profile.readArticles.includes(a.url);
-    const pct  = (profile.readProgress || {})[a.url] || 0;
+    const pct  = (LS.get('progress') || {})[a.url] || 0;
     const progBar = (pct > 2 && pct < 95)
       ? `<div class="cprog"><div class="cprog-bar" style="width:${pct}%"></div></div>`
       : '';
@@ -778,38 +890,31 @@ async function openReader(idx) {
   markAsRead(a.url);
   recordInterest(a.topic, a.level);
 
-  // Scroll progress tracking — attach after content renders
+  // Scroll progress — stored in separate LS key to avoid profile conflicts
   const overlay = document.getElementById('overlay');
   overlay._progressUrl = a.url;
   if (overlay._progressHandler) {
     overlay.removeEventListener('scroll', overlay._progressHandler);
     overlay._progressHandler = null;
   }
-  const attachProgress = () => {
-    let ticking = false;
-    overlay._progressHandler = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        ticking = false;
-        const total = overlay.scrollHeight - overlay.clientHeight;
-        if (total < 50) return;
-        const pct = Math.min(99, Math.round((overlay.scrollTop / total) * 100));
-        if (pct < 3) return;
-        const p = getProfile();
-        if (!p.readProgress) p.readProgress = {};
-        const url = overlay._progressUrl;
-        if (pct > (p.readProgress[url] || 0)) {
-          p.readProgress[url] = pct;
-          saveProfile(p);
-        }
-      });
-    };
-    overlay.addEventListener('scroll', overlay._progressHandler, { passive: true });
+  let _scrollTimer = null;
+  overlay._progressHandler = () => {
+    if (_scrollTimer) return;
+    _scrollTimer = setTimeout(() => {
+      _scrollTimer = null;
+      const total = overlay.scrollHeight - overlay.clientHeight;
+      if (total < 100) return;
+      const pct = Math.min(99, Math.round((overlay.scrollTop / total) * 100));
+      if (pct < 3) return;
+      const prog = LS.get('progress') || {};
+      const url = overlay._progressUrl;
+      if (pct > (prog[url] || 0)) {
+        prog[url] = pct;
+        LS.set('progress', prog);
+      }
+    }, 300);
   };
-  // Attach immediately and again after content loads
-  attachProgress();
-  setTimeout(attachProgress, 2000);
+  overlay.addEventListener('scroll', overlay._progressHandler, { passive: true });
 
   // Fetch full article
   try {
@@ -1124,47 +1229,46 @@ function renderPanel() {
   document.getElementById('panel-body').innerHTML = `
     <!-- Stats -->
     <div>
-      <div class="pstat-l" style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Your Progress</div>
+      <div class="panel-section-label">Your Progress</div>
       <div class="profile-stats">
         <div class="pstat"><div class="pstat-n">${p.readArticles.length}</div><div class="pstat-l">Articles read</div></div>
         <div class="pstat"><div class="pstat-n">${p.wordsLearned}</div><div class="pstat-l">Words saved</div></div>
-        <div class="pstat"><div class="pstat-n">${p.savedArticles.length}</div><div class="pstat-l">Saved</div></div>
+        <div class="pstat"><div class="pstat-n">${p.savedArticles.length}</div><div class="pstat-l">Bookmarked</div></div>
       </div>
     </div>
 
     <!-- Streak -->
     <div class="streak-row">
-      <div>🔥</div>
+      <div style="font-size:1.5rem;line-height:1">🔥</div>
       <div><div class="streak-n">${p.streak} day${p.streak===1?'':'s'}</div><div class="streak-l">reading streak</div></div>
     </div>
 
     <!-- Settings -->
     <div>
-      <div class="pstat-l" style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Settings</div>
-
-      <div class="setting-row">
-        <div><div class="setting-label">Dark mode</div></div>
-        <label class="toggle">
-          <input type="checkbox" id="dark-toggle" ${p.darkMode?'checked':''}>
-          <div class="toggle-track"></div>
-        </label>
-      </div>
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-label">Target level</div>
-          <div class="setting-sub">Articles at this level are shown first</div>
+      <div class="panel-section-label">Settings</div>
+      <div class="settings-block">
+        <div class="setting-row">
+          <div><div class="setting-label">Dark mode</div></div>
+          <label class="toggle">
+            <input type="checkbox" id="dark-toggle" ${p.darkMode?'checked':''}>
+            <div class="toggle-track"></div>
+          </label>
         </div>
-        <div class="level-select">
-          ${LEVELS.map(l=>`<button class="level-opt${p.targetLevel===l?' active':''}" data-level="${l}">${l.toUpperCase()}</button>`).join('')}
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Target level</div>
+            <div class="setting-sub">Shown first in your feed</div>
+          </div>
+          <div class="level-select">
+            ${LEVELS.map(l=>`<button class="level-opt${p.targetLevel===l?' active':''}" data-level="${l}">${l.toUpperCase()}</button>`).join('')}
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Topic interests -->
     <div>
-      <div class="pstat-l" style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Topic interests</div>
-      <div class="pstat-l" style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem">These shape your personalised feed</div>
+      <div class="panel-section-label">Topic interests</div>
       <div class="topic-grid">
         ${TOPICS.map(t => {
           const w = p.topicWeights[t] || 1;
@@ -1177,14 +1281,15 @@ function renderPanel() {
 
     <!-- Saved words -->
     <div>
-      <div class="pstat-l" style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Vocabulary (${p.savedWords.length})</div>
+      <div class="panel-section-label">Vocabulary · ${p.savedWords.length} words</div>
       <div class="words-list">${wordsHtml}</div>
     </div>
 
     <!-- Reset -->
-    <div style="padding-top:.5rem;border-top:1px solid var(--border)">
-      <button id="reset-btn" style="font-size:.75rem;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--sans)">Reset all data</button>
+    <div style="padding-top:.75rem;border-top:1px solid #c9bfae">
+      <button id="reset-btn" style="font-size:.74rem;color:#9a8e7e;background:none;border:none;cursor:pointer;font-family:var(--sans);letter-spacing:.01em">↺ Reset all data</button>
     </div>`;
+
 
   // Dark mode toggle in panel
   document.getElementById('dark-toggle').addEventListener('change', e => {
