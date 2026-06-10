@@ -778,24 +778,38 @@ async function openReader(idx) {
   markAsRead(a.url);
   recordInterest(a.topic, a.level);
 
-  // Scroll progress tracking
+  // Scroll progress tracking — attach after content renders
   const overlay = document.getElementById('overlay');
   overlay._progressUrl = a.url;
-  overlay._progressHandler && overlay.removeEventListener('scroll', overlay._progressHandler);
-  overlay._progressHandler = () => {
-    const scrolled = overlay.scrollTop;
-    const total = overlay.scrollHeight - overlay.clientHeight;
-    if (total <= 0) return;
-    const pct = Math.round((scrolled / total) * 100);
-    const p = getProfile();
-    if (!p.readProgress) p.readProgress = {};
-    const prev = p.readProgress[overlay._progressUrl] || 0;
-    if (pct > prev) {
-      p.readProgress[overlay._progressUrl] = pct;
-      saveProfile(p);
-    }
+  if (overlay._progressHandler) {
+    overlay.removeEventListener('scroll', overlay._progressHandler);
+    overlay._progressHandler = null;
+  }
+  const attachProgress = () => {
+    let ticking = false;
+    overlay._progressHandler = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        const total = overlay.scrollHeight - overlay.clientHeight;
+        if (total < 50) return;
+        const pct = Math.min(99, Math.round((overlay.scrollTop / total) * 100));
+        if (pct < 3) return;
+        const p = getProfile();
+        if (!p.readProgress) p.readProgress = {};
+        const url = overlay._progressUrl;
+        if (pct > (p.readProgress[url] || 0)) {
+          p.readProgress[url] = pct;
+          saveProfile(p);
+        }
+      });
+    };
+    overlay.addEventListener('scroll', overlay._progressHandler, { passive: true });
   };
-  overlay.addEventListener('scroll', overlay._progressHandler);
+  // Attach immediately and again after content loads
+  attachProgress();
+  setTimeout(attachProgress, 2000);
 
   // Fetch full article
   try {
