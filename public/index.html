@@ -151,6 +151,8 @@ header {
 .ctitle { font-family: var(--serif); font-size: .97rem; line-height: 1.42; font-weight: 600; color: var(--text); margin-bottom: .4rem; }
 .cdesc  { font-size: .79rem; color: var(--muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: .55rem; }
 .cfoot  { display: flex; align-items: center; justify-content: space-between; padding-top: .5rem; border-top: 1px solid var(--border); }
+.cprog  { height: 3px; border-radius: 3px; background: var(--border); margin: .45rem -.05rem 0; overflow: hidden; }
+.cprog-bar { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s; }
 .cdate  { font-size: .68rem; color: var(--subtle); }
 .ctopic { font-size: .63rem; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: var(--accent2); color: var(--accent); text-transform: capitalize; }
 
@@ -705,11 +707,16 @@ function render() {
     const idx  = ARTICLES.indexOf(a);
     const desc = clean(a.desc||'');
     const read = profile.readArticles.includes(a.url);
+    const pct  = (profile.readProgress || {})[a.url] || 0;
+    const progBar = (pct > 2 && pct < 95)
+      ? `<div class="cprog"><div class="cprog-bar" style="width:${pct}%"></div></div>`
+      : '';
     return `<div class="card${read?' read':''}" data-idx="${idx}" role="button" tabindex="0" aria-label="${h(a.title)}">
       <div class="cmeta"><span class="csrc">${h(a.source)}</span><span class="lvl lvl-${a.level}">${a.level.toUpperCase()}</span></div>
       <div class="ctitle">${h(clean(a.title))}</div>
       ${desc ? `<div class="cdesc">${h(desc)}</div>` : ''}
       <div class="cfoot"><span class="cdate">${fmtDate(a.date)}</span><span class="ctopic">${h(a.topic)}</span></div>
+      ${progBar}
     </div>`;
   }
 
@@ -769,6 +776,25 @@ async function openReader(idx) {
   // Track reading
   markAsRead(a.url);
   recordInterest(a.topic, a.level);
+
+  // Scroll progress tracking
+  const overlay = document.getElementById('overlay');
+  overlay._progressUrl = a.url;
+  overlay._progressHandler && overlay.removeEventListener('scroll', overlay._progressHandler);
+  overlay._progressHandler = () => {
+    const el = overlay;
+    const scrolled = el.scrollTop;
+    const total = el.scrollHeight - el.clientHeight;
+    if (total <= 0) return;
+    const pct = Math.round((scrolled / total) * 100);
+    if (!profile.readProgress) profile.readProgress = {};
+    const prev = profile.readProgress[overlay._progressUrl] || 0;
+    if (pct > prev) {
+      profile.readProgress[overlay._progressUrl] = pct;
+      saveProfile();
+    }
+  };
+  overlay.addEventListener('scroll', overlay._progressHandler);
 
   // Fetch full article
   try {

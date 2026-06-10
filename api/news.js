@@ -11,9 +11,11 @@ const FEEDS = [
   { url: 'https://www.theguardian.com/science/rss',                      source: 'Guardian' },
   { url: 'https://www.theverge.com/rss/index.xml',                       source: 'The Verge' },
   { url: 'https://feeds.arstechnica.com/arstechnica/index',              source: 'Ars Technica' },
-  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',  source: 'NY Times' },
-  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Science.xml',     source: 'NY Times' },
-  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/Health.xml',      source: 'NY Times' },
+  { url: 'https://feeds.npr.org/1001/rss.xml',                           source: 'NPR' },
+  { url: 'https://feeds.npr.org/1019/rss.xml',                           source: 'NPR' },
+  { url: 'https://theconversation.com/us/technology/articles.atom',      source: 'The Conversation' },
+  { url: 'https://theconversation.com/us/science/articles.atom',         source: 'The Conversation' },
+  { url: 'https://theconversation.com/us/health/articles.atom',          source: 'The Conversation' },
 ];
 
 // Priority 0 = shown last. Priority 2 = boosted (educational/lifestyle).
