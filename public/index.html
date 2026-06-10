@@ -782,16 +782,16 @@ async function openReader(idx) {
   overlay._progressUrl = a.url;
   overlay._progressHandler && overlay.removeEventListener('scroll', overlay._progressHandler);
   overlay._progressHandler = () => {
-    const el = overlay;
-    const scrolled = el.scrollTop;
-    const total = el.scrollHeight - el.clientHeight;
+    const scrolled = overlay.scrollTop;
+    const total = overlay.scrollHeight - overlay.clientHeight;
     if (total <= 0) return;
     const pct = Math.round((scrolled / total) * 100);
-    if (!profile.readProgress) profile.readProgress = {};
-    const prev = profile.readProgress[overlay._progressUrl] || 0;
+    const p = getProfile();
+    if (!p.readProgress) p.readProgress = {};
+    const prev = p.readProgress[overlay._progressUrl] || 0;
     if (pct > prev) {
-      profile.readProgress[overlay._progressUrl] = pct;
-      saveProfile();
+      p.readProgress[overlay._progressUrl] = pct;
+      saveProfile(p);
     }
   };
   overlay.addEventListener('scroll', overlay._progressHandler);

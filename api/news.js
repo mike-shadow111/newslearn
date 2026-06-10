@@ -93,7 +93,8 @@ function parseXml(xml, source) {
       return m ? m[1] : '';
     };
     const title = stripHtml(get('title'));
-    const link  = get('link') || getAttr('link', 'href');
+    const rawLink = get('link');
+    const link  = (rawLink && rawLink.startsWith('http')) ? rawLink : getAttr('link', 'href');
     const desc  = cleanDesc(get('description') || get('summary') || get('content'));
     const date  = get('pubDate') || get('published') || get('updated') || '';
 
