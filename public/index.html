@@ -278,215 +278,170 @@ header {
 .wsave:hover { text-decoration: underline; }
 
 /* ════════════════════════════════════════════
-   PROFILE PANEL — tactile / material feel
+   PROFILE PANEL
    ════════════════════════════════════════════ */
 .panel-overlay {
   display: none; position: fixed; inset: 0; z-index: 55;
-  background: rgba(0,0,0,.5);
+  background: rgba(15,12,8,.55);
 }
 .panel-overlay.open { display: block; animation: fadein .18s ease; }
 @keyframes fadein { from{opacity:0} to{opacity:1} }
 
 .panel {
   position: fixed; right: 0; top: 0; bottom: 0; z-index: 56;
-  width: min(390px, 100vw);
-  background: #f2ede4;
-  border-left: 2px solid #c9bfae;
-  box-shadow: -6px 0 32px rgba(0,0,0,.18);
+  width: min(400px, 100vw);
+  background: var(--bg);
+  border-left: 1.5px solid var(--border);
+  box-shadow: -8px 0 40px rgba(0,0,0,.13);
   display: flex; flex-direction: column;
-  animation: slidein .22s cubic-bezier(.22,.68,0,1.1);
+  animation: slidein .24s cubic-bezier(.16,1,.3,1);
   font-family: var(--sans);
-}
-[data-theme="dark"] .panel {
-  background: #1e1e19;
-  border-left-color: #3a372e;
-  box-shadow: -6px 0 32px rgba(0,0,0,.5);
 }
 @keyframes slidein { from{transform:translateX(100%)} to{transform:none} }
 
 .panel-head {
-  padding: 1.1rem 1.4rem;
-  background: #e8e0d0;
-  border-bottom: 2px solid #c9bfae;
+  padding: 18px 20px 16px;
+  border-bottom: 1.5px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
-  box-shadow: 0 2px 6px rgba(0,0,0,.07);
-}
-[data-theme="dark"] .panel-head {
-  background: #252520;
-  border-bottom-color: #3a372e;
+  flex-shrink: 0;
 }
 .panel-head h2 {
-  font-family: var(--serif); font-size: 1.15rem;
-  color: var(--text); letter-spacing: -.01em;
+  font-family: var(--serif); font-size: 1.15rem; font-weight: 600;
+  color: var(--text); letter-spacing: -.02em;
 }
 .panel-close {
-  width: 28px; height: 28px; border-radius: 6px;
-  background: #d8d0c0; border: 1px solid #bfb5a0;
-  box-shadow: 0 1px 3px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.5);
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--surface); border: 1.5px solid var(--border);
   color: var(--muted); cursor: pointer;
-  font-size: .9rem; display: flex; align-items: center; justify-content: center;
-  transition: all .1s;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .12s, border-color .12s;
+  flex-shrink: 0;
 }
-.panel-close:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.15); transform: translateY(1px); }
-[data-theme="dark"] .panel-close { background: #2e2e28; border-color: #4a4740; }
+.panel-close:hover { background: var(--border); color: var(--text); }
+.panel-close svg { width: 14px; height: 14px; }
 
 .panel-body {
-  flex: 1; overflow-y: auto; padding: 1.25rem 1.4rem;
-  display: flex; flex-direction: column; gap: 1.4rem;
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 24px;
 }
 
 /* ── Section label ── */
 .panel-section-label {
-  font-size: .65rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .1em; color: #8a7e6e; margin-bottom: .6rem;
+  font-size: .68rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .09em; color: var(--subtle);
+  margin-bottom: 8px;
 }
-[data-theme="dark"] .panel-section-label { color: #6a6458; }
 
-/* ── Stats — inset "pressed" cells ── */
-.profile-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; }
+/* ── Stats ── */
+.profile-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
 .pstat {
-  background: #e0d9cc;
-  border-radius: 10px; padding: .7rem .5rem;
-  text-align: center;
-  border: 1px solid #c4b9a8;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.6);
-}
-[data-theme="dark"] .pstat {
-  background: #252520; border-color: #3a372e;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,.3), 0 1px 0 rgba(255,255,255,.04);
-}
-.pstat-n { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; color: var(--accent); line-height: 1; }
-.pstat-l { font-size: .63rem; color: #8a7e6e; margin-top: .25rem; }
-[data-theme="dark"] .pstat-l { color: #6a6458; }
-
-/* ── Streak — raised badge ── */
-.streak-row {
-  display: flex; align-items: center; gap: .8rem;
-  background: #e8e0d0;
-  border-radius: 12px; padding: .8rem 1rem;
-  border: 1px solid #c9bfae;
-  box-shadow: 0 2px 0 #bfb5a0, 0 3px 8px rgba(0,0,0,.08);
-}
-[data-theme="dark"] .streak-row {
-  background: #252520; border-color: #3a372e;
-  box-shadow: 0 2px 0 #1a1a16, 0 3px 8px rgba(0,0,0,.3);
-}
-.streak-n { font-family: var(--serif); font-size: 1.4rem; font-weight: 600; color: var(--accent); line-height: 1; }
-.streak-l { font-size: .75rem; color: #8a7e6e; margin-top: .15rem; }
-[data-theme="dark"] .streak-l { color: #6a6458; }
-
-/* ── Settings block — like a form on paper ── */
-.settings-block {
-  background: #ede7db;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
   border-radius: 12px;
-  border: 1px solid #c9bfae;
-  box-shadow: 0 1px 4px rgba(0,0,0,.06);
-  overflow: hidden;
+  padding: 12px 8px; text-align: center;
 }
-[data-theme="dark"] .settings-block {
-  background: #222219; border-color: #3a372e;
+.pstat-n {
+  font-family: var(--serif); font-size: 1.6rem; font-weight: 600;
+  color: var(--accent); line-height: 1;
+}
+.pstat-l { font-size: .65rem; color: var(--muted); margin-top: 4px; }
+
+/* ── Streak ── */
+.streak-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 12px 16px;
+}
+.streak-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: #fff5e0; border: 1.5px solid #f0d890;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; flex-shrink: 0;
+}
+[data-theme="dark"] .streak-icon { background: #2a2510; border-color: #4a3f10; }
+.streak-n { font-family: var(--serif); font-size: 1.25rem; font-weight: 600; color: var(--text); line-height: 1; }
+.streak-l { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+
+/* ── Settings block ── */
+.settings-block {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
 }
 .setting-row {
   display: flex; align-items: center; justify-content: space-between;
-  padding: .75rem 1rem;
-  border-bottom: 1px solid #d8d0c0;
+  padding: 13px 16px; gap: 12px;
+  border-bottom: 1px solid var(--border);
+  min-height: 52px;
 }
 .setting-row:last-child { border-bottom: none; }
-[data-theme="dark"] .setting-row { border-bottom-color: #2e2e28; }
-.setting-label { font-size: .84rem; color: var(--text); font-weight: 500; }
-.setting-sub   { font-size: .7rem; color: #8a7e6e; margin-top: .15rem; }
-[data-theme="dark"] .setting-sub { color: #6a6458; }
+.setting-label { font-size: .875rem; font-weight: 500; color: var(--text); }
+.setting-sub   { font-size: .7rem; color: var(--muted); margin-top: 2px; }
 
-/* ── Toggle — physical switch feel ── */
-.toggle { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
-.toggle input { opacity: 0; width: 0; height: 0; }
+/* ── Toggle ── */
+.toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; cursor: pointer; }
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
 .toggle-track {
-  position: absolute; inset: 0; border-radius: 12px;
-  background: #c4b9a8;
-  border: 1px solid #b0a590;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,.15);
-  cursor: pointer; transition: background .2s;
+  position: absolute; inset: 0; border-radius: 13px;
+  background: var(--border); border: 1.5px solid transparent;
+  transition: background .2s, border-color .2s;
+  cursor: pointer;
 }
 .toggle input:checked + .toggle-track {
-  background: var(--accent);
-  border-color: #155a35;
+  background: var(--accent); border-color: transparent;
 }
 .toggle-track::after {
   content: ''; position: absolute; top: 3px; left: 3px;
-  width: 16px; height: 16px; border-radius: 50%;
+  width: 18px; height: 18px; border-radius: 50%;
   background: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,.25);
-  transition: transform .18s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  transition: transform .2s cubic-bezier(.34,1.4,.64,1);
 }
 .toggle input:checked + .toggle-track::after { transform: translateX(18px); }
 
-/* ── Level selector — raised buttons ── */
-.level-select { display: flex; gap: .4rem; }
+/* ── Level selector ── */
+.level-select { display: flex; gap: 6px; }
 .level-opt {
-  padding: 4px 12px; border-radius: 8px;
-  border: 1px solid #c4b9a8;
-  background: #e8e0d0;
-  box-shadow: 0 2px 0 #bfb5a0;
-  font-family: var(--sans); font-size: .73rem; color: #7a6e5e;
-  cursor: pointer;
-  transition: all .1s;
+  height: 32px; padding: 0 12px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: transparent;
+  font-family: var(--sans); font-size: .75rem; font-weight: 500;
+  color: var(--muted); cursor: pointer;
+  transition: all .12s;
 }
-.level-opt:active { box-shadow: none; transform: translateY(2px); }
+.level-opt:hover { border-color: var(--accent); color: var(--accent); }
 .level-opt.active {
-  background: var(--accent); border-color: #155a35;
-  box-shadow: 0 2px 0 #0e3d22;
-  color: #fff;
-}
-[data-theme="dark"] .level-opt {
-  background: #2e2e28; border-color: #4a4740;
-  box-shadow: 0 2px 0 #1a1a16; color: #8a8478;
-}
-[data-theme="dark"] .level-opt.active {
-  background: var(--accent); box-shadow: 0 2px 0 #1a4028;
+  background: var(--accent); border-color: var(--accent); color: #fff;
 }
 
-/* ── Topic chips — stamps ── */
-.topic-grid { display: flex; flex-wrap: wrap; gap: .45rem; }
+/* ── Topic chips ── */
+.topic-grid { display: flex; flex-wrap: wrap; gap: 8px; }
 .topic-chip {
-  padding: 5px 12px; border-radius: 8px;
-  border: 1px solid #c4b9a8;
-  background: #e8e0d0;
-  box-shadow: 0 2px 0 #bfb5a0;
-  font-family: var(--sans); font-size: .75rem; color: #7a6e5e;
-  cursor: pointer;
-  transition: all .1s;
+  height: 36px; padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--surface);
+  font-family: var(--sans); font-size: .8rem; font-weight: 500;
+  color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: all .12s;
 }
-.topic-chip:active { box-shadow: none; transform: translateY(2px); }
+.topic-chip:hover { border-color: var(--accent); color: var(--text); }
 .topic-chip.liked {
-  background: var(--accent2); border-color: var(--accent);
-  box-shadow: 0 2px 0 #1a5535;
-  color: var(--accent); font-weight: 600;
+  background: var(--accent2); border-color: var(--accent); color: var(--accent);
 }
-.topic-chip.disliked {
-  background: #ddd5c5; border-color: #b8ae9e;
-  box-shadow: 0 2px 0 #afa59a;
-  opacity: .5; text-decoration: line-through;
-}
-[data-theme="dark"] .topic-chip {
-  background: #2e2e28; border-color: #4a4740;
-  box-shadow: 0 2px 0 #1a1a16; color: #7a7468;
-}
-[data-theme="dark"] .topic-chip.liked {
-  background: var(--accent2); box-shadow: 0 2px 0 #1a3020;
-}
+.topic-chip.disliked { opacity: .4; text-decoration: line-through; }
+.topic-chip svg { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* ── Saved words ── */
-.words-list { display: flex; flex-direction: column; gap: .45rem; }
+.words-list { display: flex; flex-direction: column; gap: 6px; }
 .word-item {
   display: flex; align-items: center; justify-content: space-between;
-  padding: .5rem .8rem;
-  background: #ede7db; border-radius: 8px;
-  border: 1px solid #c9bfae;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,.06);
-  font-size: .82rem;
-}
-[data-theme="dark"] .word-item {
-  background: #252520; border-color: #3a372e;
+  padding: 10px 12px;
+  background: var(--surface); border-radius: 10px;
+  border: 1.5px solid var(--border); font-size: .83rem;
+  gap: 8px;
 }
 .word-en  { font-family: var(--serif); color: var(--text); }
 .word-ru  { color: var(--accent); font-weight: 500; font-size: .78rem; }
@@ -604,7 +559,7 @@ header {
   <div class="panel" id="panel" role="dialog" aria-label="Profile">
     <div class="panel-head">
       <h2>My Profile</h2>
-      <button class="panel-close" id="panel-close" aria-label="Close">✕</button>
+      <button class="panel-close" id="panel-close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <div class="panel-body" id="panel-body">
       <!-- filled by JS -->
@@ -898,23 +853,27 @@ async function openReader(idx) {
     overlay._progressHandler = null;
   }
   let _scrollTimer = null;
-  overlay._progressHandler = () => {
+  const _saveProgress = () => {
     if (_scrollTimer) return;
     _scrollTimer = setTimeout(() => {
       _scrollTimer = null;
-      const total = overlay.scrollHeight - overlay.clientHeight;
-      if (total < 100) return;
-      const pct = Math.min(99, Math.round((overlay.scrollTop / total) * 100));
+      // Try overlay scroll, fall back to window scroll
+      const scrolled = overlay.scrollTop || window.scrollY || 0;
+      const total    = (overlay.scrollHeight - overlay.clientHeight) || (document.body.scrollHeight - window.innerHeight);
+      if (total < 50) return;
+      const pct = Math.min(99, Math.round((scrolled / total) * 100));
       if (pct < 3) return;
       const prog = LS.get('progress') || {};
-      const url = overlay._progressUrl;
+      const url  = overlay._progressUrl;
       if (pct > (prog[url] || 0)) {
         prog[url] = pct;
         LS.set('progress', prog);
       }
-    }, 300);
+    }, 250);
   };
-  overlay.addEventListener('scroll', overlay._progressHandler, { passive: true });
+  overlay._progressHandler = _saveProgress;
+  overlay.addEventListener('scroll', _saveProgress, { passive: true });
+  window.addEventListener('scroll',  _saveProgress, { passive: true });
 
   // Fetch full article
   try {
@@ -1226,37 +1185,52 @@ function renderPanel() {
         </div>`
       ).join('');
 
+  const topicIcons = {
+    technology: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
+    science:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 3v11l-5 5h16l-5-5V3"/><path d="M6 8h12"/></svg>',
+    health:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+    business:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>',
+    sport:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93 12 12M19.07 4.93 12 12M12 12l7.07 7.07M12 12l-7.07 7.07"/></svg>',
+    culture:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 20h20M4 20V10l8-7 8 7v10"/><path d="M10 20v-5h4v5"/></svg>',
+    world:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20A14.5 14.5 0 0 0 12 2"/><path d="M2 12h20"/></svg>',
+  };
   document.getElementById('panel-body').innerHTML = `
     <!-- Stats -->
     <div>
-      <div class="panel-section-label">Your Progress</div>
+      <div class="panel-section-label">Reading progress</div>
       <div class="profile-stats">
-        <div class="pstat"><div class="pstat-n">${p.readArticles.length}</div><div class="pstat-l">Articles read</div></div>
-        <div class="pstat"><div class="pstat-n">${p.wordsLearned}</div><div class="pstat-l">Words saved</div></div>
-        <div class="pstat"><div class="pstat-n">${p.savedArticles.length}</div><div class="pstat-l">Bookmarked</div></div>
+        <div class="pstat"><div class="pstat-n">${p.readArticles.length}</div><div class="pstat-l">Articles</div></div>
+        <div class="pstat"><div class="pstat-n">${p.savedWords.length}</div><div class="pstat-l">Words saved</div></div>
+        <div class="pstat"><div class="pstat-n">${p.savedArticles.length}</div><div class="pstat-l">Bookmarks</div></div>
       </div>
     </div>
 
     <!-- Streak -->
     <div class="streak-row">
-      <div style="font-size:1.5rem;line-height:1">🔥</div>
-      <div><div class="streak-n">${p.streak} day${p.streak===1?'':'s'}</div><div class="streak-l">reading streak</div></div>
+      <div class="streak-icon">🔥</div>
+      <div>
+        <div class="streak-n">${p.streak} day${p.streak===1?'':'s'}</div>
+        <div class="streak-l">reading streak</div>
+      </div>
     </div>
 
     <!-- Settings -->
     <div>
-      <div class="panel-section-label">Settings</div>
+      <div class="panel-section-label">Preferences</div>
       <div class="settings-block">
         <div class="setting-row">
-          <div><div class="setting-label">Dark mode</div></div>
-          <label class="toggle">
+          <div class="setting-label" style="display:flex;align-items:center;gap:8px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            Dark mode
+          </div>
+          <label class="toggle" aria-label="Toggle dark mode">
             <input type="checkbox" id="dark-toggle" ${p.darkMode?'checked':''}>
             <div class="toggle-track"></div>
           </label>
         </div>
-        <div class="setting-row">
+        <div class="setting-row" style="flex-wrap:wrap;gap:10px">
           <div>
-            <div class="setting-label">Target level</div>
+            <div class="setting-label">Reading level</div>
             <div class="setting-sub">Shown first in your feed</div>
           </div>
           <div class="level-select">
@@ -1268,26 +1242,29 @@ function renderPanel() {
 
     <!-- Topic interests -->
     <div>
-      <div class="panel-section-label">Topic interests</div>
+      <div class="panel-section-label">Topics · tap to rank</div>
       <div class="topic-grid">
         ${TOPICS.map(t => {
           const w = p.topicWeights[t] || 1;
           const cls = w >= 1.3 ? 'liked' : w <= 0.6 ? 'disliked' : '';
-          const emoji = {technology:'💻',science:'🔬',health:'❤️',business:'📈',sport:'⚽',culture:'🎭',world:'🌍'}[t]||'';
-          return `<button class="topic-chip ${cls}" data-topic="${t}">${emoji} ${t}</button>`;
+          return `<button class="topic-chip ${cls}" data-topic="${t}">${topicIcons[t]||''} ${t}</button>`;
         }).join('')}
       </div>
     </div>
 
     <!-- Saved words -->
+    ${p.savedWords.length > 0 ? `
     <div>
-      <div class="panel-section-label">Vocabulary · ${p.savedWords.length} words</div>
+      <div class="panel-section-label">Vocabulary · ${p.savedWords.length}</div>
       <div class="words-list">${wordsHtml}</div>
-    </div>
+    </div>` : ''}
 
     <!-- Reset -->
-    <div style="padding-top:.75rem;border-top:1px solid #c9bfae">
-      <button id="reset-btn" style="font-size:.74rem;color:#9a8e7e;background:none;border:none;cursor:pointer;font-family:var(--sans);letter-spacing:.01em">↺ Reset all data</button>
+    <div style="padding-top:4px">
+      <button id="reset-btn" style="display:flex;align-items:center;gap:6px;font-size:.74rem;color:var(--subtle);background:none;border:none;cursor:pointer;font-family:var(--sans);padding:8px 0">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Reset all data
+      </button>
     </div>`;
 
 
