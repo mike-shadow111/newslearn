@@ -1,3 +1,7 @@
 {
-  "rewrites": [{ "source": "/api/news", "destination": "/api/news.js" }]
+  "rewrites": [
+    { "source": "/api/news", "destination": "/api/news.js" },
+    { "source": "/api/article", "destination": "/api/article.js" },
+    { "source": "/api/translate", "destination": "/api/translate.js" }
+  ]
 }
