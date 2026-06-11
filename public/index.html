@@ -1569,14 +1569,14 @@ function renderPanel() {
 
   // ── Achievements (SVG иконки, без emoji) ─────────────────────────────
   const achSvg = {
-    book:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
-    msg:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
-    fire:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
-    medal:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="15" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/><path d="M11.566 3.9A.5.5 0 0 1 12 4v0a.5.5 0 0 1 .434.747L9 11H4.5A.5.5 0 0 1 4.066 10.247l2.5-5A.5.5 0 0 1 7 5H10l1.566-1.1z"/></svg>`,
-    calendar:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
-    star:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
-    award:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>`,
-    diamond: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.57a2.41 2.41 0 0 0 3.41 0l7.59-7.57a2.41 2.41 0 0 0 0-3.41L13.7 2.71a2.41 2.41 0 0 0-3.41 0z"/></svg>`,
+    book:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+    msg:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    fire:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
+    medal:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="15" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/><path d="M11.566 3.9A.5.5 0 0 1 12 4v0a.5.5 0 0 1 .434.747L9 11H4.5A.5.5 0 0 1 4.066 10.247l2.5-5A.5.5 0 0 1 7 5H10l1.566-1.1z"/></svg>',
+    calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    star:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    award:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>',
+    diamond: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.57a2.41 2.41 0 0 0 3.41 0l7.59-7.57a2.41 2.41 0 0 0 0-3.41L13.7 2.71a2.41 2.41 0 0 0-3.41 0z"/></svg>',
   };
   const achievements = [
     { name:'Первая статья',  hint:'прочитана',       svg: achSvg.book,    unlocked: p.readArticles.length >= 1  },
@@ -1601,232 +1601,151 @@ function renderPanel() {
   };
 
   // ── Saved words HTML ──────────────────────────────────────────────────
-  const wordsHtml = p.savedWords.length === 0
-    ? `<div class="empty-state">Пока нет слов.<br>Нажми на любое слово при чтении.</div>`
-    : p.savedWords.slice(0,50).map(w =>
-        `<div class="word-item">
-          <div><div class="word-en">${h(w.word)}</div><div class="word-ru">${h(w.translation||'')}</div></div>
-          <button class="word-del" data-word="${h(w.word)}" title="Удалить" aria-label="Удалить слово ${h(w.word)}">✕</button>
-        </div>`
-      ).join('');
+  var wordsHtml;
+  if (p.savedWords.length === 0) {
+    wordsHtml = '<div class="empty-state">Пока нет слов.<br>Нажми на любое слово при чтении.</div>';
+  } else {
+    wordsHtml = p.savedWords.slice(0,50).map(function(w) {
+      return '<div class="word-item">'
+        + '<div><div class="word-en">' + h(w.word) + '</div><div class="word-ru">' + h(w.translation||'') + '</div></div>'
+        + '<button class="word-del" data-word="' + h(w.word) + '" title="Удалить" aria-label="Удалить слово ' + h(w.word) + '">\u2715</button>'
+        + '</div>';
+    }).join('');
+  }
+
+  // ── Pre-build all dynamic HTML fragments (no nested template literals) ──
+
+  const streakWord = p.streak === 1 ? 'день' : p.streak < 5 ? 'дня' : 'дней';
+
+  const goalDotsHtml = Array.from({length: DAILY_GOAL}, function(_,i) {
+    return '<div class="goal-dot' + (i < goalPct ? ' done' : '') + '"></div>';
+  }).join('');
+
+  const achievementsHtml = achievements.map(function(a) {
+    var cls = a.unlocked ? 'unlocked' : 'locked';
+    var label = a.unlocked ? a.name + ' — получено' : a.name;
+    return '<div class="ach-item ' + cls + '" aria-label="' + label + '">'
+      + '<div class="ach-icon-wrap">' + a.svg + '</div>'
+      + '<div class="ach-text">'
+      + '<div class="ach-name">' + a.name + '</div>'
+      + '<div class="ach-hint">' + a.hint + '</div>'
+      + '</div></div>';
+  }).join('');
+
+  const levelOptsHtml = LEVELS.map(function(l) {
+    var active = p.targetLevel === l ? ' active' : '';
+    return '<button class="level-opt' + active + '" data-level="' + l + '" aria-pressed="' + (p.targetLevel === l) + '">' + l.toUpperCase() + '</button>';
+  }).join('');
+
+  const topicsHtml = TOPICS.map(function(t) {
+    var w = p.topicWeights[t] || 1;
+    var cls = w >= 1.3 ? 'liked' : w <= 0.6 ? 'disliked' : '';
+    return '<button class="topic-chip ' + cls + '" data-topic="' + t + '" aria-pressed="' + (cls === 'liked') + '">' + (topicIcons[t] || '') + ' ' + t + '</button>';
+  }).join('');
+
+  var mascotHtml = '';
+  if (p.showWidgets !== false) {
+    mascotHtml = '<div class="mascot-widget">'
+      + '<div class="mascot-img-col"><img class="mascot-img" src="mascot.jpg" alt="Маскот Newslearn" loading="lazy"></div>'
+      + '<div class="mascot-copy">'
+      + '<div class="mascot-eyebrow">Ваш прогресс</div>'
+      + '<div class="mascot-headline">' + daysWithUs + '<small>дней с\u00a0Newslearn</small></div>'
+      + '<div class="mascot-phrase">' + getMascotPhrase(daysWithUs) + '</div>'
+      + '</div></div>';
+  }
+
+  var progressHtml = '';
+  if (p.showWidgets !== false) {
+    progressHtml = '<div class="progress-block">'
+      + '<div class="progress-row">'
+      + '<div class="pr-left"><div class="pr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M7 20V10l5-7 5 7v10"/><path d="M12 20v-6"/></svg></div>'
+      + '<div><div class="pr-label">Уровень английского</div><div class="pr-sub">Прогресс к следующему</div></div></div>'
+      + '<div class="pr-level-right"><div class="pr-level-badge">' + curLvl + '</div>'
+      + '<div class="pr-bar-track"><div class="pr-bar-fill" style="width:' + xpPct + '%"></div></div>'
+      + '<div class="pr-bar-hint">' + xp + '\u00a0/\u00a0' + xpMax + ' очков</div></div>'
+      + '</div>'
+      + '<div class="progress-row">'
+      + '<div class="pr-left"><div class="pr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>'
+      + '<div><div class="pr-label">Серия дней</div><div class="pr-sub">Читайте каждый день</div></div></div>'
+      + '<div class="pr-value">' + p.streak + '\u00a0<span style="font-size:.75rem;font-weight:400;color:var(--muted);font-family:var(--sans)">' + streakWord + '</span></div>'
+      + '</div>'
+      + '<div class="progress-row">'
+      + '<div class="pr-left"><div class="pr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>'
+      + '<div><div class="pr-label">Цель на сегодня</div><div class="pr-sub">' + goalPct + ' из ' + DAILY_GOAL + ' статей прочитано</div></div></div>'
+      + '<div class="goal-dots">' + goalDotsHtml + '</div>'
+      + '</div>'
+      + '</div>';
+  }
+
+  var vocabHtml = '';
+  if (p.savedWords.length > 0) {
+    vocabHtml = '<div><div class="panel-section-label">Словарь — ' + p.savedWords.length + ' слов</div>'
+      + '<div class="words-list">' + wordsHtml + '</div></div>';
+  }
+
+  var bookmarks = p.savedArticles ? p.savedArticles.length : 0;
 
   // ── Render ────────────────────────────────────────────────────────────
-  document.getElementById('panel-body').innerHTML = `
+  document.getElementById('panel-body').innerHTML =
+    mascotHtml +
 
-    <!-- ① MASCOT WIDGET -->
-    ${p.showWidgets !== false ? `
-    <div class="mascot-widget">
-      <div class="mascot-img-col">
-        <img class="mascot-img" src="mascot.jpg" alt="Маскот Newslearn" loading="lazy">
-      </div>
-      <div class="mascot-copy">
-        <div class="mascot-eyebrow">Ваш прогресс</div>
-        <div class="mascot-headline">
-          ${daysWithUs}
-          <small>дней с&nbsp;Newslearn</small>
-        </div>
-        <div class="mascot-phrase">${getMascotPhrase(daysWithUs)}</div>
-      </div>
-    </div>` : ''}
+    '<div class="stats-strip">'
+    + '<div class="pstat"><div class="pstat-n">' + p.readArticles.length + '</div><div class="pstat-l">Статей</div></div>'
+    + '<div class="stats-divider"></div>'
+    + '<div class="pstat"><div class="pstat-n">' + p.savedWords.length + '</div><div class="pstat-l">Слов</div></div>'
+    + '<div class="stats-divider"></div>'
+    + '<div class="pstat"><div class="pstat-n">' + bookmarks + '</div><div class="pstat-l">Закладки</div></div>'
+    + '</div>'
 
-    <!-- ② STATS STRIP -->
-    <div class="stats-strip">
-      <div class="pstat">
-        <div class="pstat-n">${p.readArticles.length}</div>
-        <div class="pstat-l">Статей</div>
-      </div>
-      <div class="stats-divider"></div>
-      <div class="pstat">
-        <div class="pstat-n">${p.savedWords.length}</div>
-        <div class="pstat-l">Слов</div>
-      </div>
-      <div class="stats-divider"></div>
-      <div class="pstat">
-        <div class="pstat-n">${p.savedArticles ? p.savedArticles.length : 0}</div>
-        <div class="pstat-l">Закладки</div>
-      </div>
-    </div>
+    + progressHtml
 
-    <!-- ③ PROGRESS BLOCK: уровень + стрик + цель за день -->
-    ${p.showWidgets !== false ? `
-    <div class="progress-block">
+    + '<div><div class="panel-section-label">Достижения</div>'
+    + '<div class="achievements-grid">' + achievementsHtml + '</div></div>'
 
-      <!-- Уровень английского -->
-      <div class="progress-row">
-        <div class="pr-left">
-          <div class="pr-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M7 20V10l5-7 5 7v10"/><path d="M12 20v-6"/></svg>
-          </div>
-          <div>
-            <div class="pr-label">Уровень английского</div>
-            <div class="pr-sub">Прогресс к следующему</div>
-          </div>
-        </div>
-        <div class="pr-level-right">
-          <div class="pr-level-badge">${curLvl}</div>
-          <div class="pr-bar-track" role="progressbar" aria-valuenow="${xpPct}" aria-valuemin="0" aria-valuemax="100">
-            <div class="pr-bar-fill" style="width:${xpPct}%"></div>
-          </div>
-          <div class="pr-bar-hint">${xp} / ${xpMax} очков</div>
-        </div>
-      </div>
+    + '<div><div class="panel-section-label">Настройки</div>'
+    + '<div class="settings-block">'
 
-      <!-- Серия дней -->
-      <div class="progress-row">
-        <div class="pr-left">
-          <div class="pr-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-          </div>
-          <div>
-            <div class="pr-label">Серия дней</div>
-            <div class="pr-sub">Читайте каждый день</div>
-          </div>
-        </div>
-        <div class="pr-value">${p.streak}&nbsp;<span style="font-size:.75rem;font-weight:400;color:var(--muted);font-family:var(--sans)">${p.streak===1?'день':p.streak<5?'дня':'дней'}</span></div>
-      </div>
+    + '<div class="setting-row">'
+    + '<div style="display:flex;align-items:center;gap:10px"><div class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>'
+    + '<div class="setting-label">Тёмная тема</div></div>'
+    + '<label class="toggle" aria-label="Тёмная тема"><input type="checkbox" id="dark-toggle"' + (p.darkMode ? ' checked' : '') + '><div class="toggle-track"></div></label>'
+    + '</div>'
 
-      <!-- Цель на сегодня -->
-      <div class="progress-row">
-        <div class="pr-left">
-          <div class="pr-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-          </div>
-          <div>
-            <div class="pr-label">Цель на сегодня</div>
-            <div class="pr-sub">${goalPct} из ${DAILY_GOAL} статей прочитано</div>
-          </div>
-        </div>
-        <div class="goal-dots" aria-label="Дневная цель" role="progressbar" aria-valuenow="${goalPct}" aria-valuemax="${DAILY_GOAL}">
-          ${Array.from({length: DAILY_GOAL}, (_,i) =>
-            `<div class="goal-dot${i < goalPct ? ' done' : ''}"></div>`
-          ).join('')}
-        </div>
-      </div>
+    + '<div class="setting-row">'
+    + '<div style="display:flex;align-items:center;gap:10px"><div class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></div>'
+    + '<div><div class="setting-label">Скрывать прочитанное</div><div class="setting-sub">Убирать из ленты</div></div></div>'
+    + '<label class="toggle" aria-label="Скрывать прочитанное"><input type="checkbox" id="hide-read-toggle"' + (p.hideRead ? ' checked' : '') + '><div class="toggle-track"></div></label>'
+    + '</div>'
 
-    </div>` : ''}
+    + '<div class="setting-row">'
+    + '<div style="display:flex;align-items:center;gap:10px"><div class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></div>'
+    + '<div><div class="setting-label">Только мой уровень</div><div class="setting-sub">Фильтровать ленту по ' + curLvl.toUpperCase() + '</div></div></div>'
+    + '<label class="toggle" aria-label="Фильтр по уровню"><input type="checkbox" id="level-filter-toggle"' + (p.levelFilter ? ' checked' : '') + '><div class="toggle-track"></div></label>'
+    + '</div>'
 
-    <!-- ④ ACHIEVEMENTS -->
-    <div>
-      <div class="panel-section-label">Достижения</div>
-      <div class="achievements-grid">
-        ${achievements.map(a => `
-          <div class="ach-item ${a.unlocked ? 'unlocked' : 'locked'}" aria-label="${a.name}${a.unlocked ? ' — получено' : ''}">
-            <div class="ach-icon-wrap">${a.svg}</div>
-            <div class="ach-text">
-              <div class="ach-name">${a.name}</div>
-              <div class="ach-hint">${a.hint}</div>
-            </div>
-          </div>`).join('')}
-      </div>
-    </div>
+    + '<div class="setting-row">'
+    + '<div style="display:flex;align-items:center;gap:10px"><div class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>'
+    + '<div><div class="setting-label">Визуальные элементы</div><div class="setting-sub">Маскот и прогресс-блок</div></div></div>'
+    + '<label class="toggle" aria-label="Визуальные элементы"><input type="checkbox" id="widgets-toggle"' + (p.showWidgets !== false ? ' checked' : '') + '><div class="toggle-track"></div></label>'
+    + '</div>'
 
-    <!-- ⑤ SETTINGS -->
-    <div>
-      <div class="panel-section-label">Настройки</div>
-      <div class="settings-block">
+    + '<div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px;padding-bottom:16px">'
+    + '<div style="display:flex;align-items:center;gap:10px;width:100%"><div class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></div>'
+    + '<div class="setting-label">Целевой уровень</div></div>'
+    + '<div class="level-select" style="padding-left:44px">' + levelOptsHtml + '</div>'
+    + '</div>'
 
-        <div class="setting-row">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="setting-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            </div>
-            <div class="setting-label">Тёмная тема</div>
-          </div>
-          <label class="toggle" aria-label="Тёмная тема">
-            <input type="checkbox" id="dark-toggle" ${p.darkMode?'checked':''}>
-            <div class="toggle-track"></div>
-          </label>
-        </div>
+    + '</div></div>'
 
-        <div class="setting-row">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="setting-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-            </div>
-            <div>
-              <div class="setting-label">Скрывать прочитанное</div>
-              <div class="setting-sub">Убирать из ленты</div>
-            </div>
-          </div>
-          <label class="toggle" aria-label="Скрывать прочитанное">
-            <input type="checkbox" id="hide-read-toggle" ${p.hideRead?'checked':''}>
-            <div class="toggle-track"></div>
-          </label>
-        </div>
+    + '<div><div class="panel-section-label">Темы · нажмите для приоритета</div>'
+    + '<div class="topic-grid">' + topicsHtml + '</div></div>'
 
-        <div class="setting-row">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="setting-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-            </div>
-            <div>
-              <div class="setting-label">Только мой уровень</div>
-              <div class="setting-sub">Фильтровать ленту по ${curLvl.toUpperCase()}</div>
-            </div>
-          </div>
-          <label class="toggle" aria-label="Фильтр по уровню">
-            <input type="checkbox" id="level-filter-toggle" ${p.levelFilter?'checked':''}>
-            <div class="toggle-track"></div>
-          </label>
-        </div>
+    + vocabHtml
 
-        <div class="setting-row">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="setting-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-            </div>
-            <div>
-              <div class="setting-label">Визуальные элементы</div>
-              <div class="setting-sub">Маскот и прогресс-блок</div>
-            </div>
-          </div>
-          <label class="toggle" aria-label="Визуальные элементы">
-            <input type="checkbox" id="widgets-toggle" ${p.showWidgets!==false?'checked':''}>
-            <div class="toggle-track"></div>
-          </label>
-        </div>
-
-        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px;padding-bottom:16px">
-          <div style="display:flex;align-items:center;gap:10px;width:100%">
-            <div class="setting-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-            </div>
-            <div class="setting-label">Целевой уровень</div>
-          </div>
-          <div class="level-select" style="padding-left:44px">
-            ${LEVELS.map(l=>`<button class="level-opt${p.targetLevel===l?' active':''}" data-level="${l}" aria-pressed="${p.targetLevel===l}">${l.toUpperCase()}</button>`).join('')}
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ⑥ TOPICS -->
-    <div>
-      <div class="panel-section-label">Темы · нажмите для приоритета</div>
-      <div class="topic-grid">
-        ${TOPICS.map(t => {
-          const w = p.topicWeights[t] || 1;
-          const cls = w >= 1.3 ? 'liked' : w <= 0.6 ? 'disliked' : '';
-          return `<button class="topic-chip ${cls}" data-topic="${t}" aria-pressed="${cls==='liked'}">${topicIcons[t]||''} ${t}</button>`;
-        }).join('')}
-      </div>
-    </div>
-
-    <!-- ⑦ VOCABULARY -->
-    ${p.savedWords.length > 0 ? `
-    <div>
-      <div class="panel-section-label">Словарь — ${p.savedWords.length} слов</div>
-      <div class="words-list">${wordsHtml}</div>
-    </div>` : ''}
-
-    <!-- ⑧ RESET -->
-    <div style="padding:4px 0 8px">
-      <button id="reset-btn" style="display:flex;align-items:center;gap:6px;font-size:.74rem;color:var(--subtle);background:none;border:none;cursor:pointer;font-family:var(--sans);padding:10px 0;min-height:44px" aria-label="Сбросить все данные">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-        Сбросить все данные
-      </button>
-    </div>`;
+    + '<div style="padding:4px 0 8px">'
+    + '<button id="reset-btn" style="display:flex;align-items:center;gap:6px;font-size:.74rem;color:var(--subtle);background:none;border:none;cursor:pointer;font-family:var(--sans);padding:10px 0;min-height:44px">'
+    + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>'
+    + 'Сбросить все данные</button></div>';
 
 
   // Widgets toggle (маскот + прогресс)
